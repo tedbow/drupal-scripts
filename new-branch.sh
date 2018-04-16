@@ -1,7 +1,9 @@
 #!/bin/bash
 
 # Creates a new branch from drupal.org patch files
-#
+# Parameters
+# 1. patch from drupal.org(other files won't work for now)
+# 2. The branch to start from.
 
 function ensureClean() {
   if [[ $(git diff) ]] || [[ $(git ls-files . --exclude-standard --others) ]]; then
@@ -12,17 +14,17 @@ function ensureClean() {
 }
 
 function ensureCoreRoot() {
-  ## declare an array variable
+  ## Files that should be in root.
 declare -a rootFiles=("index.php" "robots.txt" "update2.php")
 
-## now loop through the above array
-for rootFile in "${rootFiles[@]}"
-do
-   if [[ $(ls ${rootFile}) != "${rootFile}" ]]; then
-     echo "${rootFile} not found.";
-     exit;
-   fi
-done
+  ## Make sure each file is there.
+  for rootFile in "${rootFiles[@]}"
+  do
+     if [[ $(ls ${rootFile}) != "${rootFile}" ]]; then
+       echo "${rootFile} not found.";
+       exit;
+     fi
+  done
 }
 
 ensureCoreRoot
@@ -68,3 +70,5 @@ wgit-apply.sh "${1}"
 git add core
 
 git commit -m "Patch ${1}"
+
+ensureClean
