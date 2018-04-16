@@ -15,7 +15,7 @@ function ensureClean() {
 
 function ensureCoreRoot() {
   ## Files that should be in root.
-declare -a rootFiles=("index.php" "robots.txt" "update2.php")
+declare -a rootFiles=("index.php" "robots.txt" "update.php")
 
   ## Make sure each file is there.
   for rootFile in "${rootFiles[@]}"
