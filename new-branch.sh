@@ -5,6 +5,7 @@
 # 1. patch from drupal.org(other files won't work for now)
 # 2. The branch to start from.
 
+## Ensure that there are no changes and no untracked files
 function ensureClean() {
   if [[ $(git diff) ]] || [[ $(git ls-files . --exclude-standard --others) ]]; then
       echo "****** Repo must be clean to use this script ******"
@@ -13,6 +14,7 @@ function ensureClean() {
   fi
 }
 
+# Ensure at Drupal root.
 function ensureCoreRoot() {
   ## Files that should be in root.
 declare -a rootFiles=("index.php" "robots.txt" "update.php")
