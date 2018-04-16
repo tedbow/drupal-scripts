@@ -35,17 +35,17 @@ if [ "$#" -lt 2 ]; then
     exit;
 fi
 path=${1}
-br=${2}
+startBranch=${2}
 
-if [[ $(git branch --l $br) ]]; then
-    git checkout $br
+if [[ $(git branch --l $startBranch) ]]; then
+    git checkout $startBranch
+    ensureClean
+    git pull
+    ensureClean
 else
-    echo "****** Branch ${br} does NOT exist ******"
+    echo "****** Branch ${startBranch} does NOT exist ******"
     exit;
 fi
-
-
-ensureClean
 
 IFS='/' read -r -a patchparts <<< "${1}"
 
