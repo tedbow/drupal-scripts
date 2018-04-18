@@ -6,8 +6,18 @@
 # 2. The branch to start from.
 
 ## Ensure that there are no changes and no untracked files
-function ensureClean() {
+
+
+function isClean() {
   if [[ $(git diff) ]] || [[ $(git ls-files . --exclude-standard --others) ]]; then
+      echo 0
+  else
+      echo 1
+  fi
+}
+
+function ensureClean() {
+  if [[ $(isClean) == 0  ]]; then
       echo "****** Repo must be clean to use this script ******"
       git status
       exit;
@@ -67,6 +77,13 @@ fi
 git checkout -b  "${newBranchName}"
 
 wgit-apply.sh "${1}"
+
+if [[ $(isClean) == 1  ]]; then
+    echo "***** Patch did not apply. ****"
+    git checkout $startBranch
+    git branch -D "${newBranchName}"
+    exit;
+fi
 
 
 git add core
