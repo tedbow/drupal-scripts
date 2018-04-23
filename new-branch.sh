@@ -71,6 +71,16 @@ newBranchName="${fileParts[0]}"
 
 if [[ $(git branch --l $newBranchName) ]]; then
     echo "****** Branch ${newBranchName} already exists ******"
+    read -p "Switch to this branch? [y]es / [r] switch and rebase / [n] no " -n 1 -r choice
+    case "$choice" in
+      y)
+        git checkout "${newBranchName}"
+        ;;
+      r)
+        git checkout "${newBranchName}"
+        git rebase 8.6.x
+        ;;
+    esac
     exit;
 fi
 
