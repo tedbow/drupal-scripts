@@ -24,6 +24,14 @@ function ensureClean() {
   fi
 }
 
+function logBranch() {
+  RED='\033[0;31m'
+  NC='\033[0m' # No Color
+  printf "${RED}"
+  git log --pretty=format:"%an, %ar : %s" -3 ${startBranch}...${newBranchName}
+  printf "${NC}"
+}
+
 # Ensure at Drupal root.
 function ensureCoreRoot() {
   ## Files that should be in root.
@@ -71,7 +79,9 @@ newBranchName="${fileParts[0]}"
 
 if [[ $(git branch --l $newBranchName) ]]; then
     echo "****** Branch ${newBranchName} already exists ******"
+    logBranch
     read -p "Switch to this branch? [y]es / [r] switch and rebase / [n] no " -n 1 -r choice
+    echo ""
     case "$choice" in
       y)
         git checkout "${newBranchName}"
