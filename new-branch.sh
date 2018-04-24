@@ -100,6 +100,14 @@ wgit-apply.sh "${1}"
 
 if [[ $(isClean) == 1  ]]; then
     echo "***** Patch did not apply. ****"
+    read -p "Apply with rejects? y/n" -n 1 -r choice
+    echo ""
+    if [[ ${choice} == "y" ]]; then
+      wget -q -O - $1 | git apply - --reject
+      git status
+      # @todo Actually commit with rejects?
+      exit;
+    fi
     git checkout $startBranch
     git branch -D "${newBranchName}"
     exit;
