@@ -77,6 +77,7 @@ IFS='.' read -r -a fileParts <<< "${fileName}"
 
 newBranchName="${fileParts[0]}"
 
+echo "**${newBranchName}**"
 if [[ $(git branch --l $newBranchName) ]]; then
     echo "****** Branch ${newBranchName} already exists ******"
     logBranch
@@ -91,31 +92,41 @@ if [[ $(git branch --l $newBranchName) ]]; then
         git rebase 8.6.x
         ;;
     esac
-    exit;
-fi
+else
+  git checkout -b  "${newBranchName}"
 
-git checkout -b  "${newBranchName}"
+  wgit-apply.sh "${1}"
 
-wgit-apply.sh "${1}"
-
-if [[ $(isClean) == 1  ]]; then
-    echo "***** Patch did not apply. ****"
-    read -p "Apply with rejects? y/n" -n 1 -r choice
-    echo ""
-    if [[ ${choice} == "y" ]]; then
-      wget -q -O - $1 | git apply - --reject
-      git status
-      # @todo Actually commit with rejects?
+  if [[ $(isClean) == 1  ]]; then
+      echo "***** Patch did not apply. ****"
+      read -p "Apply with rejects? y/n" -n 1 -r choice
+      echo ""
+      if [[ ${choice} == "y" ]]; then
+        wget -q -O - $1 | git apply - --reject
+        git status
+        # @todo Actually commit with rejects?
+        exit;
+      fi
+      git checkout $startBranch
+      git branch -D "${newBranchName}"
       exit;
-    fi
-    git checkout $startBranch
-    git branch -D "${newBranchName}"
-    exit;
+  fi
+
+  git add core
+
+  git commit -m "Patch ${1}"
+
+  ensureClean
 fi
 
-
-git add core
-
-git commit -m "Patch ${1}"
-
-ensureClean
+read -p "Clear cache[c], Site install[i] or Neiter[n]?" -n 1 -r choice
+echo ""
+case "$choice" in
+  c)
+    drush cr
+    ;;
+  i)
+    drush sql-drop
+    drush si -y --account-pass=pass
+    ;;
+esac
