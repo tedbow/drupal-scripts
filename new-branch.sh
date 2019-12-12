@@ -93,6 +93,16 @@ if [[ $(git branch --l $newBranchName) ]]; then
         ;;
     esac
 else
+  IFS='-' read -r -a issueNumber <<< "${newBranchName}"
+  if [[ $(git branch --l *$issueNumber*) ]]; then
+    echo "****** Branch for issue ${issueNumber} already exists ******"
+    git branch --l *$issueNumber*
+    read -p "Delet other branchs? [y]es / [n] no " -n 1 -r choice
+    echo ""
+      if [[ ${choice} == "y" ]]; then
+        git branch -D `git branch --l *$issueNumber*`
+      fi
+  fi
   git checkout -b  "${newBranchName}"
 
   wgit-apply.sh "${1}"
