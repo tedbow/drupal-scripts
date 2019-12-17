@@ -37,19 +37,26 @@ shell_exec("git diff $current_head > /Users/ted.bowman/Sites/www/$issue-$comment
 
 $log_lines = shell_exec_split('git log  --pretty=oneline --max-count=15');
 array_shift($log_lines);
-print "Which commit for interdiff?\n\n";
-print_r($log_lines);
+// Look if last commit is from actual core
+if (strpos($log_lines[0], 'Issue #') !== FALSE) {
+    print "⚠️No previous commits, no interdiff\n";
+}
+else {
+  print "Which commit for interdiff?\n\n";
+  print_r($log_lines);
 
-$line_number = readline("X to exit:");
-if ($line_number === 'x') {
-  exit();
+  $line_number = readline("X to exit:");
+  if ($line_number === 'x') {
+    exit();
+  }
+
+  $from_comment = (int) readline("from comment #?");
+  $line_number = (int) $line_number;
+  $line = $log_lines[$line_number];
+  $parts = explode(' ', $line);
+  shell_exec("git diff {$parts[0]} > /Users/ted.bowman/Sites/www/interdiff-$from_comment-$comment_number.txt");
 }
 
-$from_comment = (int) readline("from comment #?");
-$line_number = (int) $line_number;
-$line = $log_lines[$line_number];
-$parts = explode(' ', $line);
-shell_exec("git diff {$parts[0]} > /Users/ted.bowman/Sites/www/interdiff-$from_comment-$comment_number.txt");
 
 
 

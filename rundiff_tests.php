@@ -27,8 +27,9 @@ function runDiffTests($branch) {
         $all_pass = FALSE;
       }
     }
+    return $all_pass;
   }
-  return $all_pass;
+  return TRUE;
 }
 
 if (isset($argv[1]) && $argv[1] === 'y') {
