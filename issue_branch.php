@@ -1,23 +1,6 @@
 #! /usr/local/opt/php@7.2/bin/php
 <?php
 require_once "global.php";
-function getPageTitle(string $url) {
-    try {
-      $urlContents = getUrlContents($url);
-
-      $dom = new DOMDocument();
-      @$dom->loadHTML($urlContents);
-
-      $title = $dom->getElementsByTagName('title');
-
-      return $title->item(0)->nodeValue;
-    }
-    catch (Exception $exception) {
-      return '';
-    }
-
-
-}
 
 /**
  * @param string $url
@@ -32,7 +15,7 @@ function getUrlContents(string $url) {
       ]
     ]
   );
-  $urlContents = file_get_contents($url, FALSE, $context);
+  $urlContents = file_get_contents($url);
   return $urlContents;
 }
 
@@ -54,20 +37,20 @@ $issue = $argv[1];
 if (isset($argv[2])) {
     $current_head = $argv[2];
 }
-//print "Title: " . getPageTitle("http://www.drupal.org/node/$issue") . "\n";
+print "✍️ Title: " . getNodeInfo($issue)->title . "\n";
 $branches = shell_exec_split("git branch --l \*$issue\*");
 /**
  * @param $issue
  */
 function getIssueFiles($issue, $pattern): array {
-  $node_info = getURLDecodedJson("https://www.drupal.org/api-d7/node.json?nid=$issue");
+  $node_info = getNodeInfo($issue);
 
-  if (empty($node_info->list[0]->field_issue_files)) {
+  if (empty($node_info->field_issue_files)) {
     return [];
   }
   else {
     $files = [];
-    foreach ($node_info->list[0]->field_issue_files as $file_info) {
+    foreach ($node_info->field_issue_files as $file_info) {
 
       if ($file_info->display) {
         $file = getURLDecodedJson($file_info->file->uri . '.json');
@@ -79,6 +62,16 @@ function getIssueFiles($issue, $pattern): array {
     }
     return $files;
   }
+}
+
+/**
+ * @param $issue
+ *
+ * @return mixed
+ */
+function getNodeInfo($issue): object {
+  $node_info = getURLDecodedJson("https://www.drupal.org/api-d7/node.json?nid=$issue");
+  return $node_info->list[0];
 }
 
 if ($branches) {
@@ -103,7 +96,9 @@ if ($branches) {
   }
 }
 else {
+    print "🚨 No existing branch for issue!\n";
   if ($patches = getIssueFiles($issue, '/\.patch/')) {
+
       print "Create a new branch from patch against $current_head?\n\n";
       $list = [];
     foreach ($patches as $patch) {
@@ -112,6 +107,9 @@ else {
     print_r($list);
     $choice = (int) readline("patch?");
     system("new-branch.sh {$patches[$choice]->url} $current_head");
+  }
+  else {
+      print "😱 No patches!";
   }
 
 
