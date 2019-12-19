@@ -4,11 +4,11 @@ require_once "global.php";
 require_once "pull_rebase.php";
 require_once "rundiff_tests.php";
 
-$branch = getCurrentBranch();
-$issue = explode('-', $branch)[0];
-if (!is_numeric($issue) || (int)$issue < 2000) {
-  print "probably not issue number $issue\n";
-  exit();
+
+
+$issue = getBranchIssue();
+if (empty($issue)) {
+  exit(1);
 }
 $diff_command = "git diff $current_head";
 

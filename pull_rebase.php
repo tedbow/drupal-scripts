@@ -1,7 +1,13 @@
 #! /usr/local/opt/php@7.2/bin/php
 <?php
 require_once "global.php";
-if (getCurrentBranch() === '8.9.x') {
+
+if ($node_branch = getNodeBranch()) {
+    $current_head = $node_branch;
+}
+
+
+if (getCurrentBranch() === $current_head) {
   system('git pull');
   exit();
 }
