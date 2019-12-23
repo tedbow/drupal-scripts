@@ -1,6 +1,7 @@
 #! /usr/local/opt/php@7.2/bin/php
 <?php
 require_once "global.php";
+exitIfNotClean();
 $issue_num = getBranchIssue();
 
 $diffs = getIssueFiles($issue_num, '/interdiff/');

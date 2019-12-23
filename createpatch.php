@@ -4,6 +4,8 @@ require_once "global.php";
 require_once "pull_rebase.php";
 require_once "rundiff_tests.php";
 
+exitIfNotClean();
+
 
 
 $issue = getBranchIssue();
@@ -28,12 +30,11 @@ else {
   }
 }
 
-$issue_url = "https://www.drupal.org/node/$issue#new";
-//$page_content = strip_tags(getUrlContents($issue_url));
-system("open $issue_url");
-$comment_number = (int) readline("comment number?");
-
-shell_exec("git diff $current_head > /Users/ted.bowman/Sites/www/$issue-$comment_number.patch");
+$node_info = getEntityInfo($issue);
+$comment_number = ((int) $node_info->comment_count) + 1;
+$patch_name = "$issue-$comment_number.patch";
+print "✂️ Creating patch $patch_name\n\n";
+shell_exec("git diff $current_head > /Users/ted.bowman/Sites/www/$patch_name");
 
 $log_lines = shell_exec_split('git log  --pretty=oneline --max-count=15');
 array_shift($log_lines);

@@ -73,11 +73,15 @@ function shell_exec_split($string) {
 }
 
 function getCurrentBranch() {
-  return shell_exec('git rev-parse --abbrev-ref HEAD');
+  return trim(shell_exec('git rev-parse --abbrev-ref HEAD'));
 }
-if (!isGitStatusClean()) {
-  exit(1);
+
+function exitIfNotClean(): void {
+  if (!isGitStatusClean()) {
+    exit(1);
+  }
 }
+
 
 function getURLDecodedJson(string $url) {
   return json_decode(file_get_contents($url));

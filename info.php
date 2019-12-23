@@ -20,7 +20,7 @@ if ($issue = getBranchIssue()) {
   if ($last_comment['author']->id != $my_uid) {
     // Get my last comment
     $comments = (array) json_decode(file_get_contents("https://www.drupal.org/api-d7/comment.json?node={$node_info['nid']}&author=$my_uid"))->list;
-
+    $important['my comment count'] = count($comments);
     $comment = array_pop($comments);
     $important['my last comment'] = getTimeFromTimeStamp($comment->created);
     //$important['my last comment'] = $important_last_comment['created'] = date("Y-m-d H:i:s", $comment->created);
