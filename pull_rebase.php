@@ -3,7 +3,7 @@
 require_once "global.php";
 exitIfNotClean();
 
-if ($node_branch = getNodeBranch()) {
+if (empty($global_options['h']) && $node_branch = getNodeBranch()) {
     $current_head = $node_branch;
 }
 

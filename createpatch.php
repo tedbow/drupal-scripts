@@ -36,15 +36,18 @@ $patch_name = "$issue-$comment_number.patch";
 print "✂️ Creating patch $patch_name\n\n";
 shell_exec("git diff $current_head > /Users/ted.bowman/Sites/www/$patch_name");
 
-$log_lines = shell_exec_split('git log  --pretty=oneline --max-count=15');
+
+$display_lines = shell_exec_split('git log --pretty=format:%s --max-count=15');
+$log_lines = shell_exec_split('git log --pretty=format:"%H" --max-count=15');
 array_shift($log_lines);
+array_shift($display_lines);
 // Look if last commit is from actual core
-if (strpos($log_lines[0], 'Issue #') !== FALSE) {
+if (strpos($display_lines[0], 'Issue #') !== FALSE) {
     print "⚠️No previous commits, no interdiff\n";
 }
 else {
   print "Which commit for interdiff?\n\n";
-  print_r($log_lines);
+  print_r($display_lines);
 
   $line_number = readline("X to exit:");
   if ($line_number === 'x') {

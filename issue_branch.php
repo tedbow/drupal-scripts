@@ -7,16 +7,24 @@ exitIfNotClean();
 
 
 $issue = getIssueNumberArg();
-if (empty($issue)) {
-    print "asdf";
+if (!isset($global_options['h'])) {
+  $current_head = getNodeBranch($issue);
 }
+
+
 
 print "✍️ Title: " . getEntityInfo($issue)->title . "\n";
 $branches = shell_exec_split("git branch --l \*$issue\*");
-
+$branches = array_map(function ($branch) {
+    return trim(str_replace('* ', '', $branch));
+}, $branches);
+$current_branch = getCurrentBranch();
 
 
 if ($branches) {
+  if (array_search($current_branch, $branches) !== FALSE) {
+    print "🚨 Currently on $current_branch\n";
+  }
     if (count($branches) === 1) {
         system("git checkout " . $branches[0]);
     }

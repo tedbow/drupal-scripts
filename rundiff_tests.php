@@ -21,7 +21,10 @@ function runDiffTests($branch) {
     $all_pass = TRUE;
     foreach ($modules_to_run as $module) {
       $output = shell_exec("vendor/bin/phpunit --configuration core core/modules/$module/tests/src/Unit");
-      $output .= shell_exec("vendor/bin/phpunit --configuration core core/modules/$module/tests/src/Kernel");
+      if ($module !== 'system') {
+        //$output .= shell_exec("vendor/bin/phpunit --configuration core core/modules/$module/tests/src/Kernel");
+      }
+
       print $output;
       if (strpos($output, 'Errors:') !== FALSE) {
         $all_pass = FALSE;
