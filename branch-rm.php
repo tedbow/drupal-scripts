@@ -17,4 +17,4 @@ if ($choice !== 'yes') {
 }
 
 system("git checkout $branch");
-system(" git -c diff.mnemonicprefix=false -c core.quotepath=false branch -D $existing");
+    system(" git -c diff.mnemonicprefix=false -c core.quotepath=false branch -D $existing");

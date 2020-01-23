@@ -11,6 +11,9 @@ foreach ($diffs as $diff) {
 }
 
 print_r($list);
+print "Last commit \n";
+system('git log --pretty=format:%s --max-count=1');
+print "\n";
 $choice = (int) readline("apply diff starting from?");
 foreach ($diffs as $i => $diff) {
     if ($i < $choice) {
