@@ -25,10 +25,7 @@ if ($branches) {
   if (array_search($current_branch, $branches) !== FALSE) {
     print "🚨 Currently on $current_branch\n";
   }
-    if (count($branches) === 1) {
-        system("git checkout " . $branches[0]);
-    }
-    else {
+
       print_r($branches);
       $choice = (int) readline("which branch to checkout?");
       if (!isset($branches[$choice])) {
@@ -36,7 +33,6 @@ if ($branches) {
         exit(1);
       }
       shell_exec("git checkout {$branches[$choice]}");
-    }
 
   if ($node_branch = getNodeBranch()) {
     $current_head = $node_branch;

@@ -37,7 +37,7 @@ print "✂️ Creating patch $patch_name\n\n";
 shell_exec("git diff $current_head > /Users/ted.bowman/Sites/www/$patch_name");
 
 
-$display_lines = shell_exec_split('git log --pretty=format:%s --max-count=15');
+$display_lines = shell_exec_split('git log --pretty=format:"%s - %aI" --max-count=15');
 $log_lines = shell_exec_split('git log --pretty=format:"%H" --max-count=15');
 array_shift($log_lines);
 array_shift($display_lines);
