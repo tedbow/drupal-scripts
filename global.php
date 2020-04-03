@@ -76,8 +76,8 @@ function getCurrentBranch() {
   return trim(shell_exec('git rev-parse --abbrev-ref HEAD'));
 }
 
-function exitIfNotClean(): void {
-  if (!isGitStatusClean()) {
+function exitIfNotClean($print_output = FALSE): void {
+  if (!isGitStatusClean($print_output)) {
     exit(1);
   }
 }
