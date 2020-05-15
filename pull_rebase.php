@@ -1,7 +1,11 @@
 #! /usr/local/opt/php@7.2/bin/php
 <?php
 require_once "global.php";
-exitIfNotClean();
+exitIfNotClean(TRUE);
+if (isset($global_options['no-rebase'])) {
+    print "No rebase\n";
+    return;
+}
 
 if (empty($global_options['h']) && $node_branch = getNodeBranch()) {
     $current_head = $node_branch;

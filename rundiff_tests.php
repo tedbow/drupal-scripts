@@ -1,6 +1,10 @@
 #! /usr/local/opt/php@7.2/bin/php
 <?php
 require_once "global.php";
+if (isset($global_options['no-tests'])) {
+    print "⚠️no tests\n";
+    return;
+}
 function runDiffTests($branch) {
 
   $files = shell_exec_split("git diff $branch --name-only");

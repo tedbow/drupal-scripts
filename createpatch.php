@@ -4,7 +4,7 @@ require_once "global.php";
 require_once "pull_rebase.php";
 require_once "rundiff_tests.php";
 
-exitIfNotClean();
+exitIfNotClean(TRUE);
 
 
 
@@ -20,21 +20,24 @@ if (strpos($diff_output, '/Users/ted.bowman') !== FALSE) {
   print "🙀🙀🙀🙀🙀🙀🙀 Did you leave a debug statement in?\n";
   exit(1);
 }
-
-if (runDiffTests($current_head)) {
-  print "🎉🎉🎉🎉🎉 All Pass 🎉🎉🎉🎉🎉\n";
-}
-else {
-  if (readline("☹☹☹☹☹☹ Tests failed, still make patch?️") !== 'y') {
-    exit();
+if (!isset($global_options['no-tests'])) {
+  if (runDiffTests($current_head)) {
+    print "🎉🎉🎉🎉🎉 All Pass 🎉🎉🎉🎉🎉\n";
+  }
+  else {
+    if (readline("☹☹☹☹☹☹ Tests failed, still make patch?️") !== 'y') {
+      exit();
+    }
   }
 }
+
+
 
 $node_info = getEntityInfo($issue);
 $comment_number = ((int) $node_info->comment_count) + 1;
 $patch_name = "$issue-$comment_number.patch";
 print "✂️ Creating patch $patch_name\n\n";
-shell_exec("git diff $current_head > /Users/ted.bowman/Sites/www/$patch_name");
+shell_exec("git diff $current_head -C35 > /Users/ted.bowman/Sites/www/$patch_name");
 
 
 $display_lines = shell_exec_split('git log --pretty=format:"%s - %aI" --max-count=15');

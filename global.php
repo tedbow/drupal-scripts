@@ -6,7 +6,7 @@ function getSetting($key) {
   }
   return $settings[$key];
 }
-$global_options = getopt(null, ["h:"]);
+$global_options = getopt(null, ["h:", "no-rebase", "no-tests"]);
 
 if (isset($global_options['h'])) {
   $current_head = $global_options['h'];
