@@ -1,4 +1,4 @@
-#! /usr/local/opt/php@7.2/bin/php
+#! /usr/local/opt/php@7.3/bin/php
 <?php
 print_r(getopt(null, ["h:"]));
 exit;

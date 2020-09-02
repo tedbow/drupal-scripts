@@ -122,7 +122,7 @@ else
       exit;
   fi
 
-  git add core
+  git add .
 
   git commit -m "Patch ${1}"
 

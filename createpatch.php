@@ -1,4 +1,4 @@
-#! /usr/local/opt/php@7.2/bin/php
+#! /usr/local/opt/php@7.3/bin/php
 <?php
 require_once "global.php";
 require_once "pull_rebase.php";
@@ -37,7 +37,7 @@ $node_info = getEntityInfo($issue);
 $comment_number = ((int) $node_info->comment_count) + 1;
 $patch_name = "$issue-$comment_number.patch";
 print "✂️ Creating patch $patch_name\n\n";
-shell_exec("git diff $current_head -C35 > /Users/ted.bowman/Sites/www/$patch_name");
+shell_exec("git diff $current_head -C35 > /Users/ted.bowman/sites/$patch_name");
 
 
 $display_lines = shell_exec_split('git log --pretty=format:"%s - %aI" --max-count=15');
@@ -61,7 +61,7 @@ else {
   $line_number = (int) $line_number;
   $line = $log_lines[$line_number];
   $parts = explode(' ', $line);
-  shell_exec("git diff {$parts[0]} > /Users/ted.bowman/Sites/www/interdiff-$from_comment-$comment_number.txt");
+  shell_exec("git diff {$parts[0]} > /Users/ted.bowman/sites/interdiff-$from_comment-$comment_number.txt");
 }
 
 

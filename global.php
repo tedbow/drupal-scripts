@@ -1,4 +1,13 @@
 <?php
+
+function ensureRoot() {
+  foreach (['index.php', 'update.php', 'README.txt'] as $file) {
+    if (!file_exists($file)) {
+      print "File $file not found. Only run in drupal root.\n";
+      exit(1);
+    }
+  }
+}
 function getSetting($key) {
   static $settings = [];
   if (empty($settings)) {

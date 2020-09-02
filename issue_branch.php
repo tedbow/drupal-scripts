@@ -1,7 +1,7 @@
-#! /usr/local/opt/php@7.2/bin/php
+#! /usr/local/opt/php@7.3/bin/php
 <?php
 require_once "global.php";
-exitIfNotClean();
+exitIfNotClean(TRUE);
 
 
 
