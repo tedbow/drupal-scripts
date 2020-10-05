@@ -47,6 +47,8 @@ function getIssueNumberArg() {
 
 }
 
+
+
 /**
  * @return mixed
  */
@@ -169,4 +171,8 @@ function getIssueStatus($status_code) {
 '18' => 'closed (cannot reproduce)',
   ];
   return $statuses[$status_code];
+}
+
+function getDiffFiles($branch) {
+    return shell_exec_split("git diff $branch --name-only");
 }

@@ -31,14 +31,44 @@ if (!isset($global_options['no-tests'])) {
   }
 }
 
+// ******* PHPCS **********
+$exts = ['inc', 'install', 'module', 'php', 'profile', 'test', 'theme', 'yml'];
+$phpcs_out = [];
+$phpcs_error_files = [];
+foreach (getDiffFiles($current_head) as $getDiffFile) {
+
+    if (in_array(pathinfo($getDiffFile)['extension'], $exts)) {
+        $output = shell_exec_split("./vendor/bin/phpcs $getDiffFile --standard=core/phpcs.xml.dist");
+        if ($output) {
+            $phpcs_error_files[] = $getDiffFile;
+            $phpcs_out = array_merge($phpcs_out, $output);
+        }
+
+
+    }
+}
+
+if ($phpcs_out) {
+    print implode("\n", $phpcs_out);
+    if (readline("run phpcbf to fix?️") === 'y') {
+        foreach ($phpcs_error_files as $phpcs_error_file) {
+            system("./vendor/bin/phpcbf $phpcs_error_file --standard=core/phpcs.xml.dist");
+        }
+    }
+    exit();
+}
+else{
+    print "🎉🎉🎉🎉🎉 PHPCS Pass 🎉🎉🎉🎉🎉\n";
+}
+// ******* END PHPCS **********
 
 
 $node_info = getEntityInfo($issue);
 $comment_number = ((int) $node_info->comment_count) + 1;
 $patch_name = "$issue-$comment_number.patch";
 print "✂️ Creating patch $patch_name\n\n";
-shell_exec("git diff $current_head -C35 > /Users/ted.bowman/sites/$patch_name");
-
+// shell_exec("git diff $current_head -C35 > /Users/ted.bowman/sites/$patch_name");
+shell_exec("git diff $current_head > /Users/ted.bowman/sites/$patch_name");
 
 $display_lines = shell_exec_split('git log --pretty=format:"%s - %aI" --max-count=15');
 $log_lines = shell_exec_split('git log --pretty=format:"%H" --max-count=15');
@@ -63,9 +93,3 @@ else {
   $parts = explode(' ', $line);
   shell_exec("git diff {$parts[0]} > /Users/ted.bowman/sites/interdiff-$from_comment-$comment_number.txt");
 }
-
-
-
-
-
-

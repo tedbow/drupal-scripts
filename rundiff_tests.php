@@ -7,7 +7,7 @@ if (isset($global_options['no-tests'])) {
 }
 function runDiffTests($branch) {
 
-  $files = shell_exec_split("git diff $branch --name-only");
+  $files = getDiffFiles($branch);
 
   // Only run unit for now
   $modules_to_run = [];
