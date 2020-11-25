@@ -12,14 +12,9 @@ $issue = getBranchIssue();
 if (empty($issue)) {
   exit(1);
 }
-$diff_command = "git diff $current_head";
 
-$diff_output = shell_exec($diff_command);
-if (strpos($diff_output, '/Users/ted.bowman') !== FALSE) {
-  print $diff_output;
-  print "🙀🙀🙀🙀🙀🙀🙀 Did you leave a debug statement in?\n";
-  exit(1);
-}
+
+checkForDebug($current_head);
 if (!isset($global_options['no-tests'])) {
   if (runDiffTests($current_head)) {
     print "🎉🎉🎉🎉🎉 All Pass 🎉🎉🎉🎉🎉\n";
@@ -32,34 +27,8 @@ if (!isset($global_options['no-tests'])) {
 }
 
 // ******* PHPCS **********
-$exts = ['inc', 'install', 'module', 'php', 'profile', 'test', 'theme', 'yml'];
-$phpcs_out = [];
-$phpcs_error_files = [];
-foreach (getDiffFiles($current_head) as $getDiffFile) {
+runPhpcs($current_head);
 
-    if (in_array(pathinfo($getDiffFile)['extension'], $exts)) {
-        $output = shell_exec_split("./vendor/bin/phpcs $getDiffFile --standard=core/phpcs.xml.dist");
-        if ($output) {
-            $phpcs_error_files[] = $getDiffFile;
-            $phpcs_out = array_merge($phpcs_out, $output);
-        }
-
-
-    }
-}
-
-if ($phpcs_out) {
-    print implode("\n", $phpcs_out);
-    if (readline("run phpcbf to fix?️") === 'y') {
-        foreach ($phpcs_error_files as $phpcs_error_file) {
-            system("./vendor/bin/phpcbf $phpcs_error_file --standard=core/phpcs.xml.dist");
-        }
-    }
-    exit();
-}
-else{
-    print "🎉🎉🎉🎉🎉 PHPCS Pass 🎉🎉🎉🎉🎉\n";
-}
 // ******* END PHPCS **********
 
 

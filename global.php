@@ -176,3 +176,50 @@ function getIssueStatus($status_code) {
 function getDiffFiles($branch) {
     return shell_exec_split("git diff $branch --name-only");
 }
+
+function runPhpcs($diff) {
+    $exts = ['inc', 'install', 'module', 'php', 'profile', 'test', 'theme', 'yml'];
+    $phpcs_out = [];
+    $phpcs_error_files = [];
+    foreach (getDiffFiles($diff) as $getDiffFile) {
+
+        if (in_array(pathinfo($getDiffFile)['extension'], $exts)) {
+            $output = shell_exec_split("./vendor/bin/phpcs $getDiffFile --standard=core/phpcs.xml.dist");
+            if ($output) {
+                $phpcs_error_files[] = $getDiffFile;
+                $phpcs_out = array_merge($phpcs_out, $output);
+            }
+
+
+        }
+    }
+
+    if ($phpcs_out) {
+        print implode("\n", $phpcs_out);
+        if (readline("run phpcbf to fix?️") === 'y') {
+            foreach ($phpcs_error_files as $phpcs_error_file) {
+                system("./vendor/bin/phpcbf $phpcs_error_file --standard=core/phpcs.xml.dist");
+            }
+        }
+        print "☹️☹️☹️☹️☹️ PHPCS Failed ☹️☹️☹️☹️☹️\n";
+        exit(1);
+    }
+    else{
+        print "🎉🎉🎉🎉🎉 PHPCS Pass 🎉🎉🎉🎉🎉\n";
+    }
+}
+
+/**
+ * @param $current_head
+ */
+function checkForDebug($current_head): void
+{
+    $diff_command = "git diff $current_head";
+
+    $diff_output = shell_exec($diff_command);
+    if (strpos($diff_output, '/Users/ted.bowman') !== false) {
+        print $diff_output;
+        print "🙀🙀🙀🙀🙀🙀🙀 Did you leave a debug statement in?\n";
+        exit(1);
+    }
+}
