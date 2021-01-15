@@ -1,6 +1,7 @@
 #! /usr/local/opt/php@7.3/bin/php
 <?php
 require_once "global.php";
+ensureRoot();
 require_once "pull_rebase.php";
 require_once "rundiff_tests.php";
 
@@ -28,6 +29,9 @@ if (!isset($global_options['no-tests'])) {
 
 // ******* PHPCS **********
 runPhpcs($current_head);
+
+// Cspell
+runCSpell($current_head);
 
 // ******* END PHPCS **********
 

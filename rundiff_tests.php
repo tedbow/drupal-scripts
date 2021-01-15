@@ -11,18 +11,26 @@ function runDiffTests($branch) {
 
   // Only run unit for now
   $modules_to_run = [];
-
+  $all_pass = TRUE;
   foreach ($files as $file) {
     if (strpos($file, 'core/modules/') === 0) {
       $parts = explode('/', $file);
+      // Make a list modules to run all unit tests for any modules changed.
       $module = $parts[2];
       if (!in_array($module, $modules_to_run)) {
         $modules_to_run[] = $module;
       }
+        if (strpos($file, '/tests/src') !== FALSE && strpos($file, '/Unit') === FALSE) {
+            // Run any non-unit tests that are different
+            $output = shell_exec("vendor/bin/phpunit --configuration core $file");
+            print $output;
+            if (strpos($output, 'Errors') !== FALSE || strpos($output, 'FAILURES!') !== FALSE) {
+                $all_pass = FALSE;
+            }
+        }
     }
   }
   if ($modules_to_run) {
-    $all_pass = TRUE;
     foreach ($modules_to_run as $module) {
       $output = shell_exec("vendor/bin/phpunit --configuration core core/modules/$module/tests/src/Unit");
       if ($module !== 'system') {
@@ -34,9 +42,8 @@ function runDiffTests($branch) {
         $all_pass = FALSE;
       }
     }
-    return $all_pass;
   }
-  return TRUE;
+  return $all_pass;
 }
 
 if (isset($argv[1]) && $argv[1] === 'y') {

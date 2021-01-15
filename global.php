@@ -1,5 +1,4 @@
 <?php
-
 function ensureRoot() {
   foreach (['index.php', 'update.php', 'README.txt'] as $file) {
     if (!file_exists($file)) {
@@ -19,6 +18,9 @@ $global_options = getopt(null, ["h:", "no-rebase", "no-tests"]);
 
 if (isset($global_options['h'])) {
   $current_head = $global_options['h'];
+}
+elseif ($node_branch = getNodeBranch()) {
+    $current_head = $node_branch;
 }
 else {
 
@@ -50,6 +52,8 @@ function getIssueNumberArg() {
 
 
 /**
+ * Get the d.o issue for the current branch.
+ *
  * @return mixed
  */
 function getBranchIssue(): string {
@@ -72,6 +76,13 @@ function isGitStatusClean($print_output = TRUE) {
   }
   return TRUE;
 }
+
+/**
+ * Run exec and split into lines.
+ * @param $string
+ *
+ * @return string[]
+ */
 function shell_exec_split($string) {
   $output = shell_exec($string);
   $output = preg_split('/\n+/', trim($output));
@@ -131,6 +142,13 @@ function getEntityInfo($issue, $type = 'node'): object {
   return getURLDecodedJson($url);
 }
 
+/**
+ * Gets the branch an issue is against.
+ * @param null|string $issue
+ *
+ * @return string
+ *   The branch the issue is against.
+ */
 function getNodeBranch($issue = NULL) {
   if (empty($issue)) {
     $issue = getBranchIssue();
@@ -178,6 +196,7 @@ function getDiffFiles($branch) {
 }
 
 function runPhpcs($diff) {
+    ensureRoot();
     $exts = ['inc', 'install', 'module', 'php', 'profile', 'test', 'theme', 'yml'];
     $phpcs_out = [];
     $phpcs_error_files = [];
@@ -222,4 +241,39 @@ function checkForDebug($current_head): void
         print "🙀🙀🙀🙀🙀🙀🙀 Did you leave a debug statement in?\n";
         exit(1);
     }
+}
+function yarnInstall() {
+    chdir('core');
+    system('rm -rf node_modules');
+    system('yarn install');
+    chdir('..');
+}
+/**
+ *
+ */
+function runCSpell($branch) {
+    chdir('core');
+    foreach (getDiffFiles($branch) as $getDiffFile) {
+        $getDiffFile = str_replace('core/', '', $getDiffFile);
+        $cmd = "yarn run cspell $getDiffFile";
+        print "$cmd\n";
+        $lines = shell_exec_split("yarn run cspell $getDiffFile");
+        print_r($lines);
+        $noErrors = true;
+        foreach ($lines as $line) {
+            if (strpos($line, 'Issues found: 0 in 0 files') !== false) {
+                $noErrors = TRUE;
+                break;
+            }
+            if (!$noErrors) {
+                print "☹️☹️☹️☹️☹️ Cspell Failed ☹️☹️☹️☹️☹️\n" . implode('\n', $lines);
+                chdir('..');
+                exit(1);
+            }
+        }
+
+
+    }
+    chdir('..');
+
 }
