@@ -1,0 +1,5 @@
+#!/usr/bin/env php
+<?php
+require_once 'global.php';
+require_once 'diff_phpcs.php';
+checkForDebug($current_head);
