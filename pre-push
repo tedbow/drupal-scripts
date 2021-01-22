@@ -2,4 +2,14 @@
 <?php
 require_once 'global.php';
 require_once 'diff_phpcs.php';
-checkForDebug($current_head);
+require_once 'rundiff_tests.php';
+if ($mergeBase = getMergeBase()) {
+    checkForDebug($mergeBase);
+    runPhpcs($mergeBase);
+    runCSpell($mergeBase);
+    runDiffTests($mergeBase);
+}
+else {
+    throw new Exception("no mergebase");
+}
+

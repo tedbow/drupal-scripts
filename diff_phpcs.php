@@ -7,4 +7,7 @@ if (getCurrentBranch() === $current_head) {
     print "Already on $current_head\n";
     exit();
 }
-runPhpcs($current_head);
+if (getFirstCalledFile() === 'diff_phpcs.php') {
+    runPhpcs($current_head);
+}
+

@@ -98,6 +98,17 @@ function getCurrentBranch() {
   return trim(shell_exec('git rev-parse --abbrev-ref HEAD'));
 }
 
+function getMergeBase():?string {
+    $current_branch = getCurrentBranch();
+    $issue_branch = getNodeBranch();
+    if (!($current_branch && $issue_branch)) {
+        throw new Exception("current branch or issue not found");
+    }
+    $commit = trim(shell_exec("git merge-base $issue_branch $current_branch"));
+    return $commit ?? NULL;
+
+}
+
 function exitIfNotClean($print_output = FALSE): void {
   if (!isGitStatusClean($print_output)) {
     exit(1);
@@ -201,7 +212,6 @@ function runPhpcs($diff) {
     $phpcs_out = [];
     $phpcs_error_files = [];
     foreach (getDiffFiles($diff) as $getDiffFile) {
-
         if (in_array(pathinfo($getDiffFile)['extension'], $exts)) {
             $output = shell_exec_split("./vendor/bin/phpcs $getDiffFile --standard=core/phpcs.xml.dist");
             if ($output) {
@@ -256,24 +266,39 @@ function runCSpell($branch) {
     foreach (getDiffFiles($branch) as $getDiffFile) {
         $getDiffFile = str_replace('core/', '', $getDiffFile);
         $cmd = "yarn run cspell $getDiffFile";
-        print "$cmd\n";
-        $lines = shell_exec_split("yarn run cspell $getDiffFile");
+        //print "💁🏼‍♂️: Running $cmd\n";
+        $result_code = NULL;$output = NULL;
+        print "cspell: $getDiffFile\n";
+        exec("yarn run cspell $getDiffFile", $output, $result_code);
+        if ($result_code !== 0) {
+            print "☹️☹️☹️☹️☹️ Cspell Failed ☹️☹️☹️☹️☹️\n";
+            print_r($output);
+            chdir('..');
+            exit(1);
+        }
+        /*$noErrors = false;
         print_r($lines);
-        $noErrors = true;
         foreach ($lines as $line) {
+            //print "fff: $line";
             if (strpos($line, 'Issues found: 0 in 0 files') !== false) {
                 $noErrors = TRUE;
                 break;
             }
-            if (!$noErrors) {
-                print "☹️☹️☹️☹️☹️ Cspell Failed ☹️☹️☹️☹️☹️\n" . implode('\n', $lines);
-                chdir('..');
-                exit(1);
-            }
         }
+        if (!$noErrors) {
+            print "☹️☹️☹️☹️☹️ Cspell Failed ☹️☹️☹️☹️☹️\n" . implode("\n", $lines);
+            chdir('..');
+            exit(1);
+        }*/
 
 
     }
+    print "🎉🎉🎉🎉🎉 CSpell Passed 🎉🎉🎉🎉🎉\n";
     chdir('..');
 
 }
+
+function getFirstCalledFile() {
+    return pathinfo($_SERVER["SCRIPT_FILENAME"])['basename'];
+}
+
