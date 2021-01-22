@@ -263,10 +263,10 @@ function yarnInstall() {
  */
 function runCSpell($branch) {
     chdir('core');
+    $gitDiffFiles = [];
     foreach (getDiffFiles($branch) as $getDiffFile) {
         $getDiffFile = str_replace('core/', '', $getDiffFile);
-        $cmd = "yarn run cspell $getDiffFile";
-        //print "💁🏼‍♂️: Running $cmd\n";
+        $gitDiffFiles[] = $getDiffFile;
         $result_code = NULL;$output = NULL;
         print "cspell: $getDiffFile\n";
         exec("yarn run cspell $getDiffFile", $output, $result_code);
@@ -292,6 +292,14 @@ function runCSpell($branch) {
         }*/
 
 
+    }
+    $result_code = NULL;$output = NULL;
+    exec("yarn run cspell" . implode(' ', $gitDiffFiles), $output, $result_code);
+    if ($result_code !== 0) {
+        print "☹️☹️☹️☹️☹️ Cspell Failed ☹️☹️☹️☹️☹️\n";
+        print_r($output);
+        chdir('..');
+        exit(1);
     }
     print "🎉🎉🎉🎉🎉 CSpell Passed 🎉🎉🎉🎉🎉\n";
     chdir('..');
