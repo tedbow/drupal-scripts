@@ -267,15 +267,6 @@ function runCSpell($branch) {
     foreach (getDiffFiles($branch) as $getDiffFile) {
         $getDiffFile = str_replace('core/', '', $getDiffFile);
         $gitDiffFiles[] = $getDiffFile;
-        $result_code = NULL;$output = NULL;
-        print "cspell: $getDiffFile\n";
-        exec("yarn run cspell $getDiffFile", $output, $result_code);
-        if ($result_code !== 0) {
-            print "☹️☹️☹️☹️☹️ Cspell Failed ☹️☹️☹️☹️☹️\n";
-            print_r($output);
-            chdir('..');
-            exit(1);
-        }
         /*$noErrors = false;
         print_r($lines);
         foreach ($lines as $line) {
@@ -294,10 +285,11 @@ function runCSpell($branch) {
 
     }
     $result_code = NULL;$output = NULL;
-    exec("yarn run cspell" . implode(' ', $gitDiffFiles), $output, $result_code);
+    exec("yarn run cspell " . implode(' ', $gitDiffFiles), $output, $result_code);
     if ($result_code !== 0) {
         print "☹️☹️☹️☹️☹️ Cspell Failed ☹️☹️☹️☹️☹️\n";
-        print_r($output);
+
+        print "\n🔥" . implode("\n🔥", array_slice($output, 2, -1)) . "\n";
         chdir('..');
         exit(1);
     }
