@@ -8,6 +8,8 @@ if ($mergeBase = getMergeBase()) {
     runPhpcs($mergeBase);
     runCSpell($mergeBase);
     runDiffTests($mergeBase);
+    print "🙏🏻All good!!\n";
+    exit();
 }
 else {
     throw new Exception("no mergebase");
