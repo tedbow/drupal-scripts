@@ -30,19 +30,32 @@ function runDiffTests($branch) {
         }
     }
   }
+
   if ($modules_to_run) {
     foreach ($modules_to_run as $module) {
-      $output = shell_exec("vendor/bin/phpunit --configuration core core/modules/$module/tests/src/Unit");
-      if ($module !== 'system') {
-        //$output .= shell_exec("vendor/bin/phpunit --configuration core core/modules/$module/tests/src/Kernel");
-      }
+        $unit_dir = "core/modules/$module/tests/src/Unit";
+        if (file_exists($unit_dir)) {
+            $output = shell_exec("vendor/bin/phpunit --configuration core $unit_dir");
+            if ($module !== 'system') {
+                //$output .= shell_exec("vendor/bin/phpunit --configuration core core/modules/$module/tests/src/Kernel");
+            }
+            print $output;
+            if (strpos($output, 'Errors:') !== FALSE) {
+                $all_pass = FALSE;
+            }
+        }
 
-      print $output;
-      if (strpos($output, 'Errors:') !== FALSE) {
-        $all_pass = FALSE;
-      }
+
     }
   }
+  if ($all_pass) {
+      print "🎉🎉🎉🎉🎉 PHPUnit Passed 🎉🎉🎉🎉🎉\n";
+  }
+  else {
+      print "☹️☹️☹️☹️☹️ Tests Failed ☹️☹️☹️☹️☹️\n";
+      exit(1);
+  }
+
   return $all_pass;
 }
 
