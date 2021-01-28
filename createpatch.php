@@ -16,6 +16,14 @@ if (empty($issue)) {
 
 
 checkForDebug($current_head);
+
+// ******* PHPCS **********
+runPhpcs($current_head);
+// ******* END PHPCS **********
+
+// Cspell
+runCSpell($current_head);
+
 if (!isset($global_options['no-tests'])) {
   if (runDiffTests($current_head)) {
     print "🎉🎉🎉🎉🎉 All Pass 🎉🎉🎉🎉🎉\n";
@@ -26,14 +34,6 @@ if (!isset($global_options['no-tests'])) {
     }
   }
 }
-
-// ******* PHPCS **********
-runPhpcs($current_head);
-
-// Cspell
-runCSpell($current_head);
-
-// ******* END PHPCS **********
 
 
 $node_info = getEntityInfo($issue);
