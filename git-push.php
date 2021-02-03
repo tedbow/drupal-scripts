@@ -9,7 +9,9 @@ if ($mergeBase = getMergeBase()) {
     runCSpell($mergeBase);
     runDiffTests($mergeBase);
     print "🙏🏻All good!!\n";
-    exit();
+    // Set a flag file for pre-push
+    touch('.pre-push');
+    system('git push');
 }
 else {
     throw new Exception("no mergebase");
