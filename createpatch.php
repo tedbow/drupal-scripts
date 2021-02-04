@@ -22,7 +22,7 @@ runPhpcs($current_head);
 // ******* END PHPCS **********
 
 // Cspell
-runCSpell($current_head);
+//runCSpell($current_head);
 
 if (!isset($global_options['no-tests'])) {
   if (runDiffTests($current_head)) {

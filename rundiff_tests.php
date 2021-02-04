@@ -20,15 +20,15 @@ function runDiffTests($branch) {
       if (!in_array($module, $modules_to_run)) {
         $modules_to_run[] = $module;
       }
-        if (strpos($file, '/tests/src') !== FALSE && strpos($file, '/Unit') === FALSE) {
-            // Run any non-unit tests that are different
-            $output = shell_exec("vendor/bin/phpunit --configuration core $file");
-            print $output;
-            if (strpos($output, 'Errors') !== FALSE || strpos($output, 'FAILURES!') !== FALSE) {
-                $all_pass = FALSE;
-            }
-        }
     }
+  if ((strpos($file, '/tests/src') !== FALSE || strpos($file, 'core/tests/Drupal') !== FALSE) && strpos($file, '/Unit') === FALSE) {
+      // Run any non-unit tests that are different
+      $output = shell_exec("vendor/bin/phpunit --configuration core $file");
+      print $output;
+      if (strpos($output, 'Errors') !== FALSE || strpos($output, 'FAILURES!') !== FALSE) {
+          $all_pass = FALSE;
+      }
+  }
   }
 
   if ($modules_to_run) {

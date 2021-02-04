@@ -11,7 +11,9 @@ if ($mergeBase = getMergeBase()) {
     print "🙏🏻All good!!\n";
     // Set a flag file for pre-push
     touch('.pre-push');
-    system('git push');
+    array_shift($argv);
+    $args_string  = implode(' ', $argv);
+    system("git push $args_string");
 }
 else {
     throw new Exception("no mergebase");
