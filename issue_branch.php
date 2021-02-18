@@ -37,12 +37,18 @@ if ($branches) {
   if ($node_branch = getNodeBranch()) {
     $current_head = $node_branch;
   }
-  if (readline("rebase against $current_head?") === 'y') {
-      system("git checkout $current_head");
-      system("git pull");
-      system("git checkout -");
-    system("git rebase $current_head");
+  if (getMergeBase()) {
+      print "\nℹ️  Probably Merge request. No rebase\n";
   }
+  else {
+      if (readline("rebase against $current_head?") === 'y') {
+          system("git checkout $current_head");
+          system("git pull");
+          system("git checkout -");
+          system("git rebase $current_head");
+      }
+  }
+
 }
 else {
     print "🚨 No existing branch for issue!\n";
