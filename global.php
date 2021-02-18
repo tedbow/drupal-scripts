@@ -265,6 +265,9 @@ function checkForCommonErrors($current_head): void
         'Camelcase var' => '/^\s*\$[a-z]*([A-Z])/',
         'id not cap' => '/ [iI]d([^a-z])/',
          'ids not cap' => '/ [iI]ds([^a-z])/',
+        'yml space' => '/\[ /',
+        'THROW' => '/' . preg_quote('@throws \Behat\Mink\Exception') . '/',
+      'self assert' => '/' . preg_quote('self::assert') . '/',
     ];
     $found_error = FALSE;
     foreach ($diff_output as $diff_line) {
@@ -287,6 +290,7 @@ function checkForCommonErrors($current_head): void
     if ($found_error) {
         exit(1);
     }
+    print "🎉🎉🎉 No common nits 🎉🎉🎉\n";
 }
 function yarnInstall() {
     chdir('core');
