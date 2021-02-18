@@ -4,7 +4,7 @@ require_once 'global.php';
 require_once 'diff_phpcs.php';
 require_once 'rundiff_tests.php';
 if ($mergeBase = getMergeBase()) {
-    checkForDebug($mergeBase);
+    checkForCommonErrors($mergeBase);
     runPhpcs($mergeBase);
     runCSpell($mergeBase);
     runDiffTests($mergeBase);

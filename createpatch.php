@@ -15,7 +15,7 @@ if (empty($issue)) {
 }
 
 
-checkForDebug($current_head);
+checkForCommonErrors($current_head);
 
 // ******* PHPCS **********
 runPhpcs($current_head);

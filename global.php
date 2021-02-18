@@ -252,14 +252,35 @@ function runPhpcs($diff) {
 /**
  * @param $current_head
  */
-function checkForDebug($current_head): void
+function checkForCommonErrors($current_head): void
 {
     $diff_command = "git diff $current_head";
-
-    $diff_output = shell_exec($diff_command);
-    if (strpos($diff_output, '/Users/ted.bowman') !== false) {
-        print $diff_output;
-        print "🙀🙀🙀🙀🙀🙀🙀 Did you leave a debug statement in?\n";
+    $diff_output = shell_exec_split($diff_command);
+    $current_file = '';
+    $last_error_file = '';
+    $error_patterns = [
+      '🤦🏼‍♂️Debug left in' => '/Users\/ted\.bowman/',
+        'Return hint needs Space' => '/function.*\):[^ ].* {/',
+    ];
+    $found_error = FALSE;
+    foreach ($diff_output as $diff_line) {
+        if (strpos($diff_line, '+++ b/') === 0) {
+            $current_file = str_replace('+++ b/', '', $diff_line);
+        }
+        if (strpos($diff_line, '+ ') === 0) {
+            foreach ($error_patterns as $problem => $error_pattern) {
+                if (preg_match("$error_pattern", $diff_line)) {
+                    if ($last_error_file !== $current_file) {
+                        print "\n☣️ File errors in $current_file\n";
+                        $last_error_file = $current_file;
+                    }
+                    print "⚠️ $problem: $diff_line\n";
+                    $found_error = TRUE;
+                }
+            }
+        }
+    }
+    if ($found_error) {
         exit(1);
     }
 }
