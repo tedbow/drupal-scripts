@@ -1,0 +1,12 @@
+{
+    "name": "tedbow/drupal-contribute-helper",
+    "description": "Some script I use to contribute to core",
+    "type": "project",
+    "authors": [
+        {
+            "name": "Ted Bowman",
+            "email": "ted@tedbow.com"
+        }
+    ],
+    "require": {}
+}

@@ -1,21 +1,16 @@
 #!/usr/bin/env php
 <?php
 require_once 'global.php';
-require_once 'diff_phpcs.php';
-require_once 'rundiff_tests.php';
-if ($mergeBase = getMergeBase()) {
-    checkForDebug($mergeBase);
-    runPhpcs($mergeBase);
-    runCSpell($mergeBase);
-    runDiffTests($mergeBase);
-    print "🙏🏻All good!!\n";
-    // Set a flag file for pre-push
-    touch('.pre-push');
-    array_shift($argv);
-    $args_string  = implode(' ', $argv);
-    system("git push $args_string");
+if (!isGitStatusClean()) {
+    print "🔥 Not clean";
+    exit();
 }
-else {
-    throw new Exception("no mergebase");
-}
+require_once 'pre-push-checks.php';
+touch('.pre-push');
+array_shift($argv);
+// filter our own args
+$filtered_arg = array_filter($argv, function ($arg) { return !in_array($arg, ['--no-tests', '--no-rebase']);});
+$args_string  = implode(' ', $filtered_arg);
+
+system("git push $args_string");
 

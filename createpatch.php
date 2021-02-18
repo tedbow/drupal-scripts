@@ -24,17 +24,14 @@ runPhpcs($current_head);
 // Cspell
 //runCSpell($current_head);
 
-if (!isset($global_options['no-tests'])) {
-  if (runDiffTests($current_head)) {
+if (runDiffTests($current_head)) {
     print "🎉🎉🎉🎉🎉 All Pass 🎉🎉🎉🎉🎉\n";
-  }
-  else {
-    if (readline("☹☹☹☹☹☹ Tests failed, still make patch?️") !== 'y') {
-      exit();
-    }
-  }
 }
-
+else {
+    if (readline("☹☹☹☹☹☹ Tests failed, still make patch?️") !== 'y') {
+        exit();
+    }
+}
 
 $node_info = getEntityInfo($issue);
 $comment_number = ((int) $node_info->comment_count) + 1;

@@ -225,13 +225,24 @@ function runPhpcs($diff) {
 
     if ($phpcs_out) {
         print implode("\n", $phpcs_out);
-        if (readline("run phpcbf to fix?️") === 'y') {
-            foreach ($phpcs_error_files as $phpcs_error_file) {
-                system("./vendor/bin/phpcbf $phpcs_error_file --standard=core/phpcs.xml.dist");
-            }
+        $choice = readline("(r)run phpcbf to fix? or (i)ignore? or exit️");
+        switch ($choice) {
+            case 'y':
+                if (readline("run phpcbf to fix?️") === 'y') {
+                    foreach ($phpcs_error_files as $phpcs_error_file) {
+                        system("./vendor/bin/phpcbf $phpcs_error_file --standard=core/phpcs.xml.dist");
+                    }
+                }
+                print "☹️☹️☹️☹️☹️ PHPCS Failed ☹️☹️☹️☹️☹️\n";
+                exit(1);
+            case 'i':
+                print "💁🏼‍♂️Ignoring phpcs!\n";
+                return;
+            default:
+                exit(1);
+
         }
-        print "☹️☹️☹️☹️☹️ PHPCS Failed ☹️☹️☹️☹️☹️\n";
-        exit(1);
+
     }
     else{
         print "🎉🎉🎉🎉🎉 PHPCS Pass 🎉🎉🎉🎉🎉\n";

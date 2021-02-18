@@ -1,12 +1,13 @@
 #! /usr/local/opt/php@7.3/bin/php
 <?php
 require_once "global.php";
-if (isset($global_options['no-tests'])) {
-    print "⚠️no tests\n";
-    return;
-}
-function runDiffTests($branch) {
 
+function runDiffTests($branch) {
+    global $global_options;
+    if (isset($global_options['no-tests'])) {
+        print "⚠️no tests\n";
+        return TRUE;
+    }
   $files = getDiffFiles($branch);
 
   // Only run unit for now
@@ -21,7 +22,9 @@ function runDiffTests($branch) {
         $modules_to_run[] = $module;
       }
     }
-  if ((strpos($file, '/tests/src') !== FALSE || strpos($file, 'core/tests/Drupal') !== FALSE) && strpos($file, '/Unit') === FALSE) {
+  if ((strpos($file, '/tests/src') !== FALSE || strpos($file, 'core/tests/Drupal') !== FALSE)
+      && strpos($file, 'Test.php') !== FALSE
+      && strpos($file, '/Unit') === FALSE) {
       // Run any non-unit tests that are different
       $output = shell_exec("vendor/bin/phpunit --configuration core $file");
       print $output;
