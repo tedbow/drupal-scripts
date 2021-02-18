@@ -263,6 +263,7 @@ function checkForCommonErrors($current_head): void
         'Return hint needs Space' => '/function.*\):[^ ].* {/',
         'CamelCase argument' => '/function.*\(.*\$[^ ]*([A-Z])/',
         'Camelcase var' => '/^\s*\$[a-z]*([A-Z])/',
+        'nonCamelCase prop' => '/(protected|public|private) \$[a-z]*_/',
         'id not cap' => '/ [iI]d([^a-z])/',
          'ids not cap' => '/ [iI]ds([^a-z])/',
         'yml space' => '/\[ /',
