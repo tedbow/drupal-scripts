@@ -261,6 +261,7 @@ function checkForCommonErrors($current_head): void
     $error_patterns = [
       '🤦🏼‍♂️Debug left in' => '/Users\/ted\.bowman/',
         'Return hint needs Space' => '/function.*\):[^ ].* {/',
+        'CamelCase argument' => '/function.*\(.*\$[^ ]*([A-Z])/'
     ];
     $found_error = FALSE;
     foreach ($diff_output as $diff_line) {
@@ -269,7 +270,7 @@ function checkForCommonErrors($current_head): void
         }
         if (strpos($diff_line, '+ ') === 0) {
             foreach ($error_patterns as $problem => $error_pattern) {
-                if (preg_match("$error_pattern", $diff_line)) {
+                if (preg_match($error_pattern, $diff_line)) {
                     if ($last_error_file !== $current_file) {
                         print "\n☣️ File errors in $current_file\n";
                         $last_error_file = $current_file;
