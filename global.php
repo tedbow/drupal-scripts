@@ -261,7 +261,10 @@ function checkForCommonErrors($current_head): void
     $error_patterns = [
       '🤦🏼‍♂️Debug left in' => '/Users\/ted\.bowman/',
         'Return hint needs Space' => '/function.*\):[^ ].* {/',
-        'CamelCase argument' => '/function.*\(.*\$[^ ]*([A-Z])/'
+        'CamelCase argument' => '/function.*\(.*\$[^ ]*([A-Z])/',
+        'Camelcase var' => '/^\s*\$[a-z]*([A-Z])/',
+        'id not cap' => '/ [iI]d([^a-z])/',
+         'ids not cap' => '/ [iI]ds([^a-z])/',
     ];
     $found_error = FALSE;
     foreach ($diff_output as $diff_line) {
