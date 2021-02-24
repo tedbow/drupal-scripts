@@ -280,7 +280,9 @@ function checkForCommonErrors($current_head): void
       'verb tense' => '/\* (Get|Set|Create|Construct|Test that) /',
         'inheritdoc' => '/(inheritDoc|\* \@inheritdoc)/',
       'data provider is 2 words' => '/\* Dataprovider for/i',
-        'the nonsense' => '/(^| |\.|,)(t|T)he (the|this|these|a|of|an)($| |\.)/'
+        'the nonsense' => '/(^| |\.|,)(t|T)he (the|this|these|a|of|an)($| |\.)/',
+      'is_null call, use === NULL' => '/is_null\(/',
+      '==, Always use === ' => '/ == /',
     ];
     $found_error = FALSE;
     foreach ($diff_output as $diff_line) {
