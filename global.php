@@ -254,6 +254,9 @@ function runPhpcs($diff) {
  */
 function checkForCommonErrors($current_head): void
 {
+    if (ini_get('xdebug.default_enable')) {
+        print "\n️☹️☹️☹️☹️ Xdebug is on, tests will take longer! ☹️☹️☹️☹️\n";
+    }
     $diff_command = "git diff $current_head";
     $diff_output = shell_exec_split($diff_command);
     $current_file = '';
@@ -264,11 +267,19 @@ function checkForCommonErrors($current_head): void
         'CamelCase argument' => '/function.*\(.*\$[^ ]*([A-Z])/',
         'Camelcase var' => '/^\s*\$[a-z]*([A-Z])/',
         'nonCamelCase prop' => '/(protected|public|private) \$[a-z]*_/',
+      'camel case without scope' => '/[^(protected|public|private)] \$[a-z]*([A-Z])/',
+      'no return type' => '/(protected|public|private) function .*(?<!__construct)\(.*\)[^\:]/',
         'id not cap' => '/ [iI]d([^a-z])/',
          'ids not cap' => '/ [iI]ds([^a-z])/',
         'yml space' => '/\[ /',
         'THROW' => '/' . preg_quote('@throws \Behat\Mink\Exception') . '/',
       'self assert' => '/' . preg_quote('self::assert') . '/',
+      'return generic array' => '/' . preg_quote('* @return array') . '/',
+        'return NULL cap' => '/@return .*\|NULL/',
+        'constructor doc' => '/\* [A-z]* constructor\./',
+      'verb tense' => '/\* (Get|Set|Create|Construct|Test that) /',
+        'inheritdoc' => '/(inheritDoc|\* \@inheritdoc)/',
+      'data provider is 2 words' => '/\* Dataprovider for/i',
     ];
     $found_error = FALSE;
     foreach ($diff_output as $diff_line) {
