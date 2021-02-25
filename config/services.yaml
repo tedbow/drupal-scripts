@@ -1,0 +1,4 @@
+services:
+  TedbowDrupalScripts\Command\IssueBranch:
+    tags:
+      - { name: 'console.command', command: 'issue:branch' }

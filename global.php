@@ -27,27 +27,7 @@ else {
   $current_head = getSetting('default_head_branch');
 }
 
-/**
- * @return int|string
- */
-function getIssueNumberArg() {
-  foreach ($GLOBALS['argv'] as $i => $arg) {
-    if ($i === 0) {
-      continue;
-    }
-    if (strpos($arg, '--') === 0) {
-      continue;
-    }
-    if (!is_numeric($arg)) {
-      echo "Not valid issue number: $arg \n";
-      exit(1);
-    }
-    return $arg;
-  }
-  echo "Please enter issue number\n";
-  exit(1);
 
-}
 
 
 
@@ -77,72 +57,21 @@ function isGitStatusClean($print_output = TRUE) {
   return TRUE;
 }
 
-/**
- * Run exec and split into lines.
- * @param $string
- *
- * @return string[]
- */
-function shell_exec_split($string) {
-  $output = shell_exec($string);
-  $output = preg_split('/\n+/', trim($output));
-  $output = array_map(function ($line) {
-    return trim($line);
-  }, $output);
 
-  return array_filter($output);
-
-}
 
 function getCurrentBranch() {
   return trim(shell_exec('git rev-parse --abbrev-ref HEAD'));
 }
 
-function getMergeBase():?string {
-    $current_branch = getCurrentBranch();
-    $issue_branch = getNodeBranch();
-    if (!($current_branch && $issue_branch)) {
-        throw new Exception("current branch or issue not found");
-    }
-    $commit = trim(shell_exec("git merge-base $issue_branch $current_branch"));
-    return $commit ?? NULL;
 
-}
 
-function exitIfNotClean($print_output = FALSE): void {
-  if (!isGitStatusClean($print_output)) {
-    exit(1);
-  }
-}
+
 
 
 function getURLDecodedJson(string $url) {
   return json_decode(file_get_contents($url));
 }
 
-/**
- * @param $issue
- */
-function getIssueFiles($issue, $pattern): array {
-  $node_info = getEntityInfo($issue);
-  if (empty($node_info->field_issue_files)) {
-    return [];
-  }
-  else {
-    $files = [];
-    foreach ($node_info->field_issue_files as $file_info) {
-
-      if ($file_info->display) {
-        $file = getURLDecodedJson($file_info->file->uri . '.json');
-        if (preg_match($pattern, $file->name)) {
-          $files[] = $file;
-        }
-      }
-
-    }
-    return $files;
-  }
-}
 /**
  * @param $issue
  *
@@ -153,27 +82,7 @@ function getEntityInfo($issue, $type = 'node'): object {
   return getURLDecodedJson($url);
 }
 
-/**
- * Gets the branch an issue is against.
- * @param null|string $issue
- *
- * @return string
- *   The branch the issue is against.
- */
-function getNodeBranch($issue = NULL) {
-  if (empty($issue)) {
-    $issue = getBranchIssue();
-  }
-  if (empty($issue)) {
-    return '';
-  }
-  $version = getEntityInfo($issue)->field_issue_version;
-  if (strpos($version, '-dev') !== FALSE ) {
-    return str_replace('-dev', '', $version);
-  }
-  return '';
 
-}
 
 function getTimeFromTimeStamp($timestamp) {
   $dt = new DateTime("now", new DateTimeZone(getSetting('timezone'))); //first argument "must" be a string
