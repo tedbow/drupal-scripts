@@ -281,6 +281,8 @@ function checkForCommonErrors($current_head): void
         'inheritdoc' => '/(inheritDoc|\* \@inheritdoc)/',
       'data provider is 2 words' => '/\* Dataprovider for/i',
         'the nonsense' => '/(^| |\.|,)(t|T)he (the|this|these|a|of|an)($| |\.)/',
+        // add more nonsense here
+        'nonsense' => '/(to as)/',
       'is_null call, use === NULL' => '/is_null\(/',
       '==, Always use === ' => '/ == /',
     ];
