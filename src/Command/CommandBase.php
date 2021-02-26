@@ -8,6 +8,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use TedbowDrupalScripts\FunStyle;
 use TedbowDrupalScripts\Settings;
 
 class CommandBase extends Command
@@ -23,7 +24,7 @@ class CommandBase extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->style = new SymfonyStyle($input, $output);
+        $this->style = new FunStyle($input, $output);
         if (static::REQUIRE_CLEAN_GIT && !$this->isGitStatusClean($output)) {
             return self::FAILURE;
         }

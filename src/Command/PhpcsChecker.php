@@ -29,8 +29,6 @@ class PhpcsChecker extends CheckerBase
                     $phpcs_error_files[] = $getDiffFile;
                     $phpcs_out = array_merge($phpcs_out, $output);
                 }
-
-
             }
         }
 

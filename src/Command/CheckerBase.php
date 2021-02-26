@@ -21,12 +21,16 @@ abstract class CheckerBase extends CommandBase
         if (parent::execute($input, $output) === self::FAILURE) {
             return self::FAILURE;
         }
+        $calledDirect = empty($diffPoint);
         if (!$diffPoint) {
             $diffPoint = $this->getDiffPoint();
         }
         $this->diffPoint = $diffPoint;
         if (!$this->doCheck()) {
             return self::FAILURE;
+        }
+        if ($calledDirect) {
+            $this->style->note("Checker passed: " . $this->getName());
         }
         return self::SUCCESS;
     }
