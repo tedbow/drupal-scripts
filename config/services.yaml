@@ -1,4 +1,15 @@
 services:
-  TedbowDrupalScripts\Command\IssueBranch:
+  issue_branch:
+    class: TedbowDrupalScripts\Command\IssueBranch
+    arguments: ['']
     tags:
       - { name: 'console.command', command: 'issue:branch' }
+  checker_runner:
+    class: TedbowDrupalScripts\Command\RunChecks
+    tags:
+      - { name: 'console.command', command: 'run:checks' }
+    arguments: ['@checker.phpcs']
+  checker.phpcs:
+    class: TedbowDrupalScripts\Command\PhpcsChecker
+    tags:
+      - { name: 'console.command', command: 'checker:phpcs' }

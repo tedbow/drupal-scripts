@@ -7,18 +7,29 @@ namespace TedbowDrupalScripts\Command;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
 use TedbowDrupalScripts\Settings;
 
 class CommandBase extends Command
 {
-    protected static $requireCleanGit = TRUE;
+    protected const REQUIRE_CLEAN_GIT = TRUE;
+
+    protected static $requireAtRoot = TRUE;
+
+    /**
+     * @var \Symfony\Component\Console\Style\SymfonyStyle
+     */
+    protected $style;
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        if (!$this->isGitStatusClean($output)) {
-            if (self::$requireCleanGit) {
-                return self::FAILURE;
-            }
+        $this->style = new SymfonyStyle($input, $output);
+        if (static::REQUIRE_CLEAN_GIT && !$this->isGitStatusClean($output)) {
+            return self::FAILURE;
+        }
+        if (self::$requireAtRoot && !$this->isAtRoot()) {
+            $this->style->error("This command must be run at Drupal root");
+            return self::FAILURE;
         }
         return self::SUCCESS;
     }
@@ -151,6 +162,15 @@ class CommandBase extends Command
 
     }
 
+    protected function getDiffPoint(): ?string {
+        $mergeBase = $this->getMergeBase();
+        if ($mergeBase) {
+            return $mergeBase;
+        }
+        return $this->getNodeBranch();
+
+    }
+
     /**
      * @param $issue
      */
@@ -173,6 +193,30 @@ class CommandBase extends Command
             }
             return $files;
         }
+    }
+
+    /**
+     * @return bool
+     */
+    private function isAtRoot()
+    {
+        foreach (['index.php', 'update.php', 'README.txt'] as $file) {
+            if (!file_exists($file)) {
+                return FALSE;
+            }
+        }
+        return TRUE;
+    }
+
+    /**
+     * @param string $diffPoint
+     *
+     * @return string[]
+     */
+    protected function getDiffFiles(string $diffPoint): array
+    {
+        return $this->shell_exec_split("git diff $diffPoint --name-only");
+
     }
 
 }

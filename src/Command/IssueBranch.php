@@ -16,7 +16,7 @@ class IssueBranch extends CommandBase
 {
     protected static $defaultName = 'issue:branch';
 
-    protected static $requireCleanGit;
+    protected const REQUIRE_CLEAN_GIT = TRUE;
 
     protected function configure()
     {
@@ -42,23 +42,22 @@ class IssueBranch extends CommandBase
             return trim(str_replace('* ', '', $branch));
         }, $branches);
         $current_branch = $this->getCurrentBranch();
-        $style = new SymfonyStyle($input, $output);
 
         if ($branches) {
             if (array_search($current_branch, $branches) !== FALSE) {
                 $output->writeln("🚨 Currently on $current_branch");
             }
 
-            $branch = $style->choice('which branch to checkout?', $branches);
-            $style->info('You have just selected: ' . $branch);
+            $branch = $this->style->choice('which branch to checkout?', $branches);
+            $this->style->info('You have just selected: ' . $branch);
             shell_exec("git checkout $branch");
             if ($this->getMergeBase()) {
 
-                $style->info("Probably Merge request. No rebase");
+                $this->style->info("Probably Merge request. No rebase");
                 return self::SUCCESS;
             }
             else {
-                if ($style->confirm("rebase against $current_head?", false)) {
+                if ($this->style->confirm("rebase against $current_head?", false)) {
                     system("git checkout $current_head");
                     system("git pull");
                     system("git checkout -");
@@ -69,27 +68,24 @@ class IssueBranch extends CommandBase
 
         }
         else {
-            $style->warning("🚨 No existing branch for issue!");
+            $this->style->warning("🚨 No existing branch for issue!");
             if ($patches = $this->getIssueFiles($issueNumber, '/\.patch/')) {
 
                 $list = [];
                 foreach ($patches as $patch) {
                     $list[] = $patch->name;
                 }
-                $choice = $style->choice("Create a new branch from patch against $current_head using patch?", $list);
+                $choice = $this->style->choice("Create a new branch from patch against $current_head using patch?", $list);
                 system("new-branch.sh {$patches[$choice]->url} $current_head");
                 return self::SUCCESS;
             }
             else {
-                $style->warning("😱 No patches!");
+                $this->style->warning("😱 No patches!");
                 return self::FAILURE;
             }
 
 
         }
-
-
-
     }
 
 
