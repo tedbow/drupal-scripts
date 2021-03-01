@@ -16,8 +16,6 @@ class IssueBranch extends CommandBase
 {
     protected static $defaultName = 'issue:branch';
 
-    protected const REQUIRE_CLEAN_GIT = TRUE;
-
     protected function configure()
     {
         $this->addArgument('issue_number', InputArgument::REQUIRED, 'The issue number');
@@ -27,7 +25,9 @@ class IssueBranch extends CommandBase
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        parent::execute($input, $output);
+        if (self::FAILURE === parent::execute($input, $output)) {
+            return self::FAILURE;
+        }
         $issueNumber = $input->getArgument('issue_number');
         $current_head = $input->getArgument('head');
         if ( !$current_head ) {

@@ -7,6 +7,7 @@ namespace TedbowDrupalScripts\Command;
 class PHPUnitChecker extends CheckerBase
 {
 
+    protected const CONFIRM_XDEBUG = true;
     protected static $defaultName = "checker:phpunit";
     /**
      * @inheritDoc

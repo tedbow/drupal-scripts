@@ -5,14 +5,25 @@ namespace TedbowDrupalScripts\Command;
 
 
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class RunChecks extends CommandBase
 {
+    use RunTestsTrait;
     protected const REQUIRE_CLEAN_GIT = FALSE;
+    protected const CONFIRM_XDEBUG = TRUE;
 
-    protected static $defaultName = "run:checks";
+    protected static $defaultName = 'run:checks';
 
+    /**
+     * @inheritDoc
+     */
+    protected function configure()
+    {
+        parent::configure();
+        $this->addTestRunOptions();
+    }
 
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -20,7 +31,9 @@ class RunChecks extends CommandBase
         if (parent::execute($input, $output) === self::FAILURE) {
             return self::FAILURE;
         }
-        //$this->phpcs->check($this->style);
+        if ($skipTests = $input->getOption('skip')) {
+            $skipTests = explode(',', $skipTests);
+        }
         $diffPoint = $this->getDiffPoint();
         if (empty($diffPoint)) {
             $this->style->error('Cannot determine diff point');
@@ -28,13 +41,19 @@ class RunChecks extends CommandBase
         $checkers = $this->getApplication()->all('checker');
         /** @var \TedbowDrupalScripts\Command\CheckerBase $checker */
         foreach ($checkers as $checker) {
-            $this->style->info('Running ' . $checker->getName());
+            $checkerName = $checker->getName();
+            $shortName = explode(':', $checkerName)[1];
+            if ($skipTests && in_array($shortName, $skipTests)) {
+                $this->style->warning("Skipping " . $checkerName);
+                continue;
+            }
+            $this->style->info('Running ' . $checkerName);
 
             if ($checker->execute($input, $output, $diffPoint) === self::FAILURE) {
-                $this->style->error("Failed: " . $checker->getName());
+                $this->style->error("Failed: " . $checkerName);
                 return self::FAILURE;
             }
-            $this->style->info("Passed " . $checker->getName());
+            $this->style->info("Passed " . $checkerName);
         }
         return self::SUCCESS;
 

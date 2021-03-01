@@ -13,9 +13,6 @@ class NitChecker extends CheckerBase
      */
     protected function doCheck(): bool
     {
-        if (ini_get('xdebug.default_enable')) {
-            $this->style->warning("️☹️☹️☹️☹️ Xdebug is on, tests will take longer! ☹️☹️☹️☹️")   ;
-        }
         $diff_command = "git diff " . $this->diffPoint;
         $diff_output = $this->shell_exec_split($diff_command);
         $current_file = '';

@@ -13,7 +13,7 @@ class IssueInfo extends CommandBase
     protected static $defaultName = "issue:info";
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        if (FAILURE === parent::execute()) {
+        if (self::FAILURE === parent::execute($input, $output)) {
             return self::FAILURE;
         }
         if ($issue = $this->getBranchIssue()) {
@@ -46,6 +46,10 @@ class IssueInfo extends CommandBase
             $output->writeln("⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐");
             return self::SUCCESS;
 
+        }
+        else {
+            $this->style->warning('Could not find issue for branch');
+            return self::FAILURE;
         }
     }
 

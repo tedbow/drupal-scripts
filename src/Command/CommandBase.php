@@ -7,29 +7,53 @@ namespace TedbowDrupalScripts\Command;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
 use TedbowDrupalScripts\FunStyle;
 use TedbowDrupalScripts\Settings;
 
 class CommandBase extends Command
 {
-    protected const REQUIRE_CLEAN_GIT = TRUE;
+    protected const REQUIRE_CLEAN_GIT = true;
+    // Commands that will take a lot longer if xdebug is enabled should confirm.
+    protected const CONFIRM_XDEBUG = false;
 
     protected static $requireAtRoot = TRUE;
+
+    /**
+     * @inheritDoc
+     */
+    protected function configure()
+    {
+        parent::configure();
+        $this->addOption('no-tests');
+        $this->addOption('no-rebase');
+    }
+
 
     /**
      * @var \Symfony\Component\Console\Style\SymfonyStyle
      */
     protected $style;
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    /**
+     * @inheritDoc
+     */
+    public function run(InputInterface $input, OutputInterface $output)
     {
-        $this->style = new FunStyle($input, $output);
         if (static::REQUIRE_CLEAN_GIT && !$this->isGitStatusClean($output)) {
             return self::FAILURE;
         }
         if (self::$requireAtRoot && !$this->isAtRoot()) {
             $this->style->error("This command must be run at Drupal root");
+            return self::FAILURE;
+        }
+        return parent::run($input, $output);
+    }
+
+
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
+        $this->style = new FunStyle($input, $output);
+        if (!$this->confirmXedbug()) {
             return self::FAILURE;
         }
         return self::SUCCESS;
@@ -153,23 +177,31 @@ class CommandBase extends Command
     }
 
     protected function getMergeBase():?string {
-        $current_branch = $this->getCurrentBranch();
-        $issue_branch = $this->getNodeBranch();
-        if (!($current_branch && $issue_branch)) {
-            throw new \Exception("current branch or issue not found");
+        static $mergeBase = false;
+        if ($mergeBase === false) {
+            $current_branch = $this->getCurrentBranch();
+            $issue_branch = $this->getNodeBranch();
+            if (!($current_branch && $issue_branch)) {
+                throw new \Exception("current branch or issue not found");
+            }
+            $commit = trim(shell_exec("git merge-base $issue_branch $current_branch"));
+            $mergeBase = $commit ?? NULL;
         }
-        $commit = trim(shell_exec("git merge-base $issue_branch $current_branch"));
-        return $commit ?? NULL;
-
+        return $mergeBase;
     }
 
     protected function getDiffPoint(): ?string {
-        $mergeBase = $this->getMergeBase();
-        if ($mergeBase) {
-            return $mergeBase;
+        static $diffPoint = false;
+        if ($diffPoint === false) {
+            $mergeBase = $this->getMergeBase();
+            if ($mergeBase) {
+                $diffPoint = $mergeBase;
+            }
+            else {
+                $diffPoint = $this->getNodeBranch();
+            }
         }
-        return $this->getNodeBranch();
-
+        return $diffPoint;
     }
 
     /**
@@ -218,6 +250,17 @@ class CommandBase extends Command
     {
         return $this->shell_exec_split("git diff $diffPoint --name-only");
 
+    }
+
+    protected function confirmXedbug(): bool {
+        /** @var \TedbowDrupalScripts\ScriptApplication $app */
+        $app = $this->getApplication();
+        // If running calling other commands only run this check once.
+        if (static::CONFIRM_XDEBUG && !$app->isXdebugConfirmed() && ini_get('xdebug.default_enable')) {
+            $app->setXdebugConfirmed();
+            return $this->style->confirm("️Xdebug is on, tests & composer will take longer! Continue?", false);
+        }
+        return true;
     }
 
 }
