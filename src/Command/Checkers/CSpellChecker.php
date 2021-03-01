@@ -1,7 +1,7 @@
 <?php
 
+namespace TedbowDrupalScripts\Command\Checkers;
 
-namespace TedbowDrupalScripts\Command;
 
 
 class CSpellChecker extends CheckerBase

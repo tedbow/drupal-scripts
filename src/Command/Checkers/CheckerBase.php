@@ -1,11 +1,12 @@
 <?php
 
 
-namespace TedbowDrupalScripts\Command;
+namespace TedbowDrupalScripts\Command\Checkers;
 
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use TedbowDrupalScripts\Command\CommandBase;
 
 abstract class CheckerBase extends CommandBase
 {

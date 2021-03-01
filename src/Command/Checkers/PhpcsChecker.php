@@ -1,14 +1,9 @@
 <?php
 
+namespace TedbowDrupalScripts\Command\Checkers;
 
-namespace TedbowDrupalScripts\Command;
 
 
-use Symfony\Component\Console\Input\Input;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\Output;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
 
 class PhpcsChecker extends CheckerBase
 {

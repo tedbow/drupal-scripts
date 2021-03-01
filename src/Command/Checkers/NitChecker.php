@@ -1,10 +1,8 @@
 <?php
 
+namespace TedbowDrupalScripts\Command\Checkers;
 
-namespace TedbowDrupalScripts\Command;
 
-
-use Symfony\Component\Yaml\Yaml;
 use TedbowDrupalScripts\UtilsTrait;
 
 class NitChecker extends CheckerBase

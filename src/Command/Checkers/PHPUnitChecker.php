@@ -1,7 +1,7 @@
 <?php
 
+namespace TedbowDrupalScripts\Command\Checkers;
 
-namespace TedbowDrupalScripts\Command;
 
 
 class PHPUnitChecker extends CheckerBase
@@ -14,6 +14,8 @@ class PHPUnitChecker extends CheckerBase
      */
     protected function doCheck(): bool
     {
+        $output_directory = getenv('BROWSERTEST_OUTPUT_DIRECTORY');
+        putenv('BROWSERTEST_OUTPUT_DIRECTORY');
         // Add option to base for this.
         /*global $global_options;
         if (isset($global_options['no-tests'])) {
@@ -61,6 +63,7 @@ class PHPUnitChecker extends CheckerBase
                 }
             }
         }
+        putenv("BROWSERTEST_OUTPUT_DIRECTORY=$output_directory");
         return $all_pass;
     }
 }

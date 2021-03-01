@@ -2,15 +2,14 @@
 <?php
 require_once __DIR__ . '/vendor/autoload.php';
 
-use Symfony\Component\Console\Application;
-use TedbowDrupalScripts\Command\CSpellChecker;
+use TedbowDrupalScripts\Command\Checkers\CSpellChecker;
+use TedbowDrupalScripts\Command\Checkers\NitChecker;
+use TedbowDrupalScripts\Command\Checkers\PhpcsChecker;
+use TedbowDrupalScripts\Command\Checkers\PHPUnitChecker;
 use TedbowDrupalScripts\Command\GitPush;
 use TedbowDrupalScripts\Command\IssueBranch;
 use TedbowDrupalScripts\Command\IssueInfo;
 use TedbowDrupalScripts\Command\NewCodeBase;
-use TedbowDrupalScripts\Command\NitChecker;
-use TedbowDrupalScripts\Command\PhpcsChecker;
-use TedbowDrupalScripts\Command\PHPUnitChecker;
 use TedbowDrupalScripts\Command\RunChecks;
 use TedbowDrupalScripts\ScriptApplication;
 
