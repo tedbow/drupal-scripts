@@ -3,6 +3,8 @@
 namespace TedbowDrupalScripts;
 
 
+use Symfony\Component\Yaml\Yaml;
+
 /**
  * Misc utilities.
  */
@@ -18,4 +20,7 @@ trait UtilsTrait {
     return dirname($scriptPath);
   }
 
+  protected static function parseYml($file) {
+      return Yaml::parseFile(static::getBaseDir() . "/$file.yml" );
+  }
 }
