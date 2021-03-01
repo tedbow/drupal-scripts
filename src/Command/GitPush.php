@@ -53,8 +53,7 @@ class GitPush extends CommandBase
         // @see pre-push.php
         touch('.pre-push');
         system("git push $args_string");
-
-
+        return self::SUCCESS;
     }
 
 
