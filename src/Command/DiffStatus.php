@@ -24,8 +24,11 @@ class DiffStatus extends CommandBase
     protected function configure()
     {
         parent::configure();
+        $this->addArgument('mode', InputArgument::OPTIONAL, 'full or name', 'name');
         $this->addArgument('file_pattern', InputArgument::OPTIONAL, 'The file/directory pattern to search for.', '');
     }
+
+
 
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -34,7 +37,15 @@ class DiffStatus extends CommandBase
             return self::FAILURE;
         }
         $diffPoint = $this->getDiffPoint();
-        $status_output = shell_exec("git diff --name-status $diffPoint " . $input->getArgument('file_pattern'));
+        $mode = $input->getArgument('mode');
+        if (!in_array($mode, ['full', 'name'])) {
+            $this->style->error("First arg must be 'name' or 'full'");
+        }
+        $cmd = 'git diff '
+          . ($mode === 'name' ? ' --name-status' : '')
+          . " $diffPoint "
+          . $input->getArgument('file_pattern');
+        $status_output = shell_exec($cmd);
         $output->write($status_output);
         return self::SUCCESS;
     }
