@@ -39,7 +39,9 @@ class CommandBase extends Command
      */
     public function run(InputInterface $input, OutputInterface $output)
     {
+        $this->style = new FunStyle($input, $output);
         if (static::REQUIRE_CLEAN_GIT && !$this->isGitStatusClean($output)) {
+            $this->style->error('git status must be clean to run this command.');
             return self::FAILURE;
         }
         if (self::$requireAtRoot && !$this->isAtRoot()) {

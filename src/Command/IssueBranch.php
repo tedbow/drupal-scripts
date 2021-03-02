@@ -29,12 +29,6 @@ class IssueBranch extends CommandBase
             return self::FAILURE;
         }
         $issueNumber = $input->getArgument('issue_number');
-        $current_head = $input->getArgument('head');
-        if ( !$current_head ) {
-            $current_head = $this->getNodeBranch($issueNumber);
-        }
-
-
 
         $output->writeln("✍️ Title: " . $this->getEntityInfo($issueNumber)->title);
         $branches = $this->shell_exec_split("git branch --l \*$issueNumber\*");
@@ -45,10 +39,14 @@ class IssueBranch extends CommandBase
 
         if ($branches) {
             if (array_search($current_branch, $branches) !== FALSE) {
-                $output->writeln("🚨 Currently on $current_branch");
+                $this->style->warning("🚨 Currently on already on branch for this issue: $current_branch");
             }
-
-            $branch = $this->style->choice('which branch to checkout?', $branches);
+            $list = $branches;
+            $list['x'] = 'Do not switch. Exit';
+            $branch = $this->style->choice('which branch to checkout?', $list);
+            if ($branch === 'x') {
+                return self::SUCCESS;
+            }
             $this->style->info('You have just selected: ' . $branch);
             shell_exec("git checkout $branch");
             if ($this->getMergeBase()) {
@@ -57,6 +55,7 @@ class IssueBranch extends CommandBase
                 return self::SUCCESS;
             }
             else {
+                $current_head = $this->getCurrentHead($input);
                 if ($this->style->confirm("rebase against $current_head?", false)) {
                     system("git checkout $current_head");
                     system("git pull");
@@ -75,7 +74,12 @@ class IssueBranch extends CommandBase
                 foreach ($patches as $patch) {
                     $list[] = $patch->name;
                 }
+                $list['x'] = 'Do not create a branch, going to use merge request instead';
+                $current_head = $this->getCurrentHead($input);
                 $choice = $this->style->choice("Create a new branch from patch against $current_head using patch?", $list);
+                if ($choice === 'x') {
+                    $this->style->info('Merge request, right on!');
+                }
                 system("new-branch.sh {$patches[$choice]->url} $current_head");
                 return self::SUCCESS;
             }
@@ -86,6 +90,15 @@ class IssueBranch extends CommandBase
 
 
         }
+    }
+
+    private function getCurrentHead(InputInterface $input)
+    {
+        $current_head = $input->getArgument('head');
+        if ( !$current_head ) {
+            $current_head = $this->getNodeBranch($input->getArgument('issue_number'));
+        }
+        return $current_head;
     }
 
 
