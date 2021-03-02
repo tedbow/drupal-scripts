@@ -6,6 +6,7 @@ use TedbowDrupalScripts\Command\Checkers\CSpellChecker;
 use TedbowDrupalScripts\Command\Checkers\NitChecker;
 use TedbowDrupalScripts\Command\Checkers\PhpcsChecker;
 use TedbowDrupalScripts\Command\Checkers\PHPUnitChecker;
+use TedbowDrupalScripts\Command\DiffStatus;
 use TedbowDrupalScripts\Command\GitPush;
 use TedbowDrupalScripts\Command\IssueBranch;
 use TedbowDrupalScripts\Command\IssueInfo;
@@ -19,6 +20,7 @@ $app->add(new IssueBranch());
 $app->add(new RunChecks());
 $app->add(new GitPush());
 $app->add(new NewCodeBase());
+$app->add(new DiffStatus());
 
 // Add the checker commands in the order they should run.
 $app->add(new NitChecker());
