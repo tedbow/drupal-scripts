@@ -235,8 +235,9 @@ class CommandBase extends Command
      */
     private function isAtRoot()
     {
-        foreach (['index.php', 'update.php', 'README.txt'] as $file) {
+        foreach (['index.php', 'update.php'] as $file) {
             if (!file_exists($file)) {
+                $this->style->error("Missing file: $file");
                 return FALSE;
             }
         }
