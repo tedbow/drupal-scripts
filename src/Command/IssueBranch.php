@@ -47,6 +47,7 @@ class IssueBranch extends CommandBase
             if ($branch === 'x') {
                 return self::SUCCESS;
             }
+            $branch = $branches[$branch];
             $this->style->info('You have just selected: ' . $branch);
             shell_exec("git checkout $branch");
             if ($this->getMergeBase()) {
