@@ -27,7 +27,7 @@ abstract class CheckerBase extends CommandBase
             $diffPoint = $this->getDiffPoint();
         }
         $this->diffPoint = $diffPoint;
-        if (!$this->doCheck()) {
+        if (!$this->doCheck($input, $output)) {
             return self::FAILURE;
         }
         if ($calledDirect) {
@@ -39,5 +39,5 @@ abstract class CheckerBase extends CommandBase
     /**
      * @return bool
      */
-    abstract protected function doCheck(): bool;
+    abstract protected function doCheck(InputInterface $input, OutputInterface $output): bool;
 }

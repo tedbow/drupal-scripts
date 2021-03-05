@@ -3,6 +3,8 @@
 namespace TedbowDrupalScripts\Command\Checkers;
 
 
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 use TedbowDrupalScripts\UtilsTrait;
 
 class NitChecker extends CheckerBase
@@ -13,7 +15,7 @@ class NitChecker extends CheckerBase
     /**
      * @inheritDoc
      */
-    protected function doCheck(): bool
+    protected function doCheck(InputInterface $input, OutputInterface $output): bool
     {
         $diff_command = "git diff " . $this->diffPoint;
         $diff_output = $this->shell_exec_split($diff_command);

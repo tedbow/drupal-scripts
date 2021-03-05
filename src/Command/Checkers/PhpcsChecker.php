@@ -5,6 +5,9 @@ namespace TedbowDrupalScripts\Command\Checkers;
 
 
 
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+
 class PhpcsChecker extends CheckerBase
 {
     protected static $defaultName = "checker:phpcs";
@@ -12,7 +15,7 @@ class PhpcsChecker extends CheckerBase
     /**
      * {@inheritdoc}
      */
-    protected function doCheck(): bool
+    protected function doCheck(InputInterface $input, OutputInterface $output): bool
     {
         $exts = ['inc', 'install', 'module', 'php', 'profile', 'test', 'theme', 'yml'];
         $phpcs_out = [];

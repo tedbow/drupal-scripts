@@ -4,6 +4,9 @@ namespace TedbowDrupalScripts\Command\Checkers;
 
 
 
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+
 class CSpellChecker extends CheckerBase
 {
 
@@ -11,7 +14,7 @@ class CSpellChecker extends CheckerBase
     /**
      * @inheritDoc
      */
-    protected function doCheck(): bool
+    protected function doCheck(InputInterface $input, OutputInterface $output): bool
     {
         chdir('core');
         $gitDiffFiles = [];
