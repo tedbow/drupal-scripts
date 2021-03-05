@@ -40,9 +40,7 @@ class PHPUnitChecker extends CheckerBase
               && strpos($file, 'Test.php') !== FALSE
               && strpos($file, '/Unit') === FALSE) {
                 // Run any non-unit tests that are different
-                $output = shell_exec("vendor/bin/phpunit --configuration core $file");
-                print $output;
-                if (strpos($output, 'Errors') !== FALSE || strpos($output, 'FAILURES!') !== FALSE) {
+                if ($this->runTestForPath($file)) {
                     $all_pass = FALSE;
                 }
             }
@@ -52,12 +50,7 @@ class PHPUnitChecker extends CheckerBase
             foreach ($modules_to_run as $module) {
                 $unit_dir = "core/modules/$module/tests/src/Unit";
                 if (file_exists($unit_dir)) {
-                    $output = shell_exec("vendor/bin/phpunit --configuration core $unit_dir");
-                    if ($module !== 'system') {
-                        //$output .= shell_exec("vendor/bin/phpunit --configuration core core/modules/$module/tests/src/Kernel");
-                    }
-                    $this->style->write($output);
-                    if (strpos($output, 'Errors:') !== FALSE) {
+                    if ($this->runTestForPath($unit_dir)) {
                         $all_pass = FALSE;
                     }
                 }
@@ -65,5 +58,18 @@ class PHPUnitChecker extends CheckerBase
         }
         putenv("BROWSERTEST_OUTPUT_DIRECTORY=$output_directory");
         return $all_pass;
+    }
+
+    /**
+     * @param string $testPath
+     *   Path to test file or directory.
+     *
+     * @return bool
+     */
+    protected function runTestForPath(string $testPath): bool
+    {
+        $output = shell_exec("vendor/bin/phpunit --configuration core $testPath");
+        $this->style->write($output);
+        return !(strpos($output, 'Errors') !== FALSE || strpos($output, 'FAILURES!') !== FALSE);
     }
 }
