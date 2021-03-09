@@ -30,6 +30,7 @@ class PHPUnitChecker extends CheckerBase
     }
 
 
+
     /**
      * @inheritDoc
      */
