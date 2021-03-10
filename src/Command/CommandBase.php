@@ -79,11 +79,17 @@ class CommandBase extends Command
      *
      * @return string
      */
-    protected function getBranchIssue(): string {
-        $branch = $this->getCurrentBranch();
+    protected function getBranchIssue(string $branch = null): string {
+        $useCurrent = false;
+        if (!$branch) {
+            $branch = $this->getCurrentBranch();
+            $useCurrent = true;
+        }
         $issue = explode('-', $branch)[0];
         if (!is_numeric($issue) || (int) $issue < 2000) {
-            print "probably not issue number $issue\n";
+            if ($useCurrent) {
+                print "probably not issue number $issue\n";
+            }
             return '';
         }
         return $issue;

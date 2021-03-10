@@ -18,7 +18,7 @@ class IssueBranch extends CommandBase
 
     protected function configure()
     {
-        $this->addArgument('issue_number', InputArgument::REQUIRED, 'The issue number');
+        $this->addArgument('issue_number', InputArgument::OPTIONAL, 'The issue number');
         $this->addArgument('head', InputArgument::OPTIONAL, 'Which base to rebase against');
     }
 
@@ -29,9 +29,34 @@ class IssueBranch extends CommandBase
             return self::FAILURE;
         }
         $issueNumber = $input->getArgument('issue_number');
+        if (!$issueNumber) {
+            $sorted_branches = $this->shell_exec_split('git branch --sort=-committerdate');
+            $issues = [];
+            foreach ($sorted_branches as $sorted_branch) {
+                $issue = $this->getBranchIssue($sorted_branch);
+                if ($issue && !in_array($issue, $issues)) {
+                    $issues[] = $issue;
+                }
+                if (count($issues) > 5) {
+                    // Only display last 3 issues.
+                    break;
+                }
+            }
+            if (empty($issues)) {
+                $this->style->warning('No issue branches found.');
+                return self::FAILURE;
+            }
+            $issueIndex = 0;
+            foreach ($issues as $issue) {
+                $issue_titles[] = "#$issue: " . $this->getEntityInfo($issue)->title;
+
+            }
+            $title = $this->style->choice('Which issue do you want to work on?', $issue_titles);    
+            $issueNumber = $issues[array_search($title, $issue_titles)];
+        }
 
         $output->writeln("✍️ Title: " . $this->getEntityInfo($issueNumber)->title);
-        $branches = $this->shell_exec_split("git branch --l \*$issueNumber\*");
+        $branches = $this->shell_exec_split("git branch --l \*$issueNumber\* --sort=-committerdate");
         $branches = array_map(function ($branch) {
             return trim(str_replace('* ', '', $branch));
         }, $branches);
@@ -43,7 +68,7 @@ class IssueBranch extends CommandBase
             }
             $list = $branches;
             $list['x'] = 'Do not switch. Exit';
-            $branch = $this->style->choice('which branch to checkout?', $list);
+            $branch = $this->style->choice('which branch to checkout? (sorted by most recent commit)', $list);
             if ($branch === 'x') {
                 return self::SUCCESS;
             }

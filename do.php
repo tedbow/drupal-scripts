@@ -13,6 +13,7 @@ use TedbowDrupalScripts\Command\IssueBranch;
 use TedbowDrupalScripts\Command\IssueInfo;
 use TedbowDrupalScripts\Command\NewCodeBase;
 use TedbowDrupalScripts\Command\RunChecks;
+use TedbowDrupalScripts\Command\XdebugOn;
 use TedbowDrupalScripts\ScriptApplication;
 
 $app = new ScriptApplication('tedbow Drupal scripts', 'v1.0');
@@ -24,6 +25,7 @@ $app->add(new GitPush());
 $app->add(new NewCodeBase());
 $app->add(new DiffStatus());
 $app->add(new GitRmBranch());
+$app->add(new XdebugOn());
 
 // Add the checker commands in the order they should run.
 $app->add(new NitChecker());

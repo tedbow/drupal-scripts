@@ -5,6 +5,7 @@ namespace TedbowDrupalScripts\Command;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -13,7 +14,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class DiffStatus extends CommandBase
 {
-    protected const REQUIRE_CLEAN_GIT = true;
+    protected const REQUIRE_CLEAN_GIT = false;
     protected static $requireAtRoot = false;
 
     protected static $defaultName = 'git:name-status';
@@ -26,6 +27,7 @@ class DiffStatus extends CommandBase
         parent::configure();
         $this->addArgument('mode', InputArgument::OPTIONAL, 'full or name', 'name');
         $this->addArgument('file_pattern', InputArgument::OPTIONAL, 'The file/directory pattern to search for.', '');
+        $this->addOption('head', null, InputOption::VALUE_REQUIRED);
     }
 
 
@@ -36,10 +38,16 @@ class DiffStatus extends CommandBase
         if (parent::execute($input, $output) === self::FAILURE) {
             return self::FAILURE;
         }
-        $diffPoint = $this->getDiffPoint();
+        if ($head = $input->getOption('head')) {
+            $diffPoint = $head;
+        }
+        else {
+            $diffPoint = $this->getDiffPoint();
+        }
         $mode = $input->getArgument('mode');
         if (!in_array($mode, ['full', 'name'])) {
-            $this->style->error("First arg must be 'name' or 'full'");
+            $this->style->error("First arg must be 'name' or 'full'. found: " . $mode);
+            return self::FAILURE;
         }
         $cmd = 'git diff '
           . ($mode === 'name' ? ' --name-status' : '')
