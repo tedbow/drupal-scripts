@@ -7,6 +7,7 @@ namespace TedbowDrupalScripts\Command;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Process\Process;
 use TedbowDrupalScripts\FunStyle;
 use TedbowDrupalScripts\Settings;
 
@@ -26,6 +27,7 @@ class CommandBase extends Command
         parent::configure();
         $this->addOption('no-tests');
         $this->addOption('no-rebase');
+        $this->addOption('no-catch');
     }
 
 
@@ -44,16 +46,20 @@ class CommandBase extends Command
             $this->style->error('git status must be clean to run this command.');
             return self::FAILURE;
         }
-        if (self::$requireAtRoot && !$this->isAtRoot()) {
+        if (static::$requireAtRoot && !$this->isAtRoot()) {
             $this->style->error("This command must be run at Drupal root");
             return self::FAILURE;
         }
+
         return parent::run($input, $output);
     }
 
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        if ($input->getOption('no-catch')) {
+            $this->getApplication()->setCatchExceptions(false);
+        }
         $this->style = new FunStyle($input, $output);
         if (!$this->confirmXedbug()) {
             return self::FAILURE;
