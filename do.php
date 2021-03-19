@@ -11,6 +11,7 @@ use TedbowDrupalScripts\Command\GitPush;
 use TedbowDrupalScripts\Command\GitRmBranch;
 use TedbowDrupalScripts\Command\IssueBranch;
 use TedbowDrupalScripts\Command\IssueInfo;
+use TedbowDrupalScripts\Command\ListPlus;
 use TedbowDrupalScripts\Command\NewCodeBase;
 use TedbowDrupalScripts\Command\RunChecks;
 use TedbowDrupalScripts\Command\XdebugOn;
@@ -26,11 +27,14 @@ $app->add(new NewCodeBase());
 $app->add(new DiffStatus());
 $app->add(new GitRmBranch());
 $app->add(new XdebugOn());
+$app->add(new ListPlus());
 
 // Add the checker commands in the order they should run.
 $app->add(new NitChecker());
 $app->add(new PhpcsChecker());
 $app->add(new CSpellChecker());
 $app->add(new PHPUnitChecker());
+$app->setCatchExceptions(false);
+$app->setDefaultCommand('listplus');
 $app->run();
 
