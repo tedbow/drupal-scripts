@@ -3,9 +3,7 @@
 
 namespace TedbowDrupalScripts\Command;
 
-
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class RunChecks extends CommandBase
@@ -39,7 +37,7 @@ class RunChecks extends CommandBase
             $this->style->error('Cannot determine diff point');
         }
         $checkers = $this->getApplication()->all('checker');
-        /** @var \TedbowDrupalScripts\Command\CheckerBase $checker */
+        /** @var \TedbowDrupalScripts\Command\Checkers\CheckerBase $checker */
         foreach ($checkers as $checker) {
             $checkerName = $checker->getName();
             $shortName = explode(':', $checkerName)[1];

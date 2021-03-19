@@ -18,6 +18,7 @@ class IssueBranch extends CommandBase
 
     protected function configure()
     {
+        parent::configure();
         $this->addArgument('issue_number', InputArgument::OPTIONAL, 'The issue number');
         $this->addArgument('head', InputArgument::OPTIONAL, 'Which base to rebase against');
     }
@@ -37,7 +38,7 @@ class IssueBranch extends CommandBase
                 if ($issue && !in_array($issue, $issues)) {
                     $issues[] = $issue;
                 }
-                if (count($issues) > 5) {
+                if (count($issues) > 3) {
                     // Only display last 3 issues.
                     break;
                 }
@@ -51,7 +52,7 @@ class IssueBranch extends CommandBase
                 $issue_titles[] = "#$issue: " . $this->getEntityInfo($issue)->title;
 
             }
-            $title = $this->style->choice('Which issue do you want to work on?', $issue_titles);    
+            $title = $this->style->choice('Which issue do you want to work on?', $issue_titles);
             $issueNumber = $issues[array_search($title, $issue_titles)];
         }
 

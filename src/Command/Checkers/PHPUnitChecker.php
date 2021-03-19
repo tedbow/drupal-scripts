@@ -6,6 +6,7 @@ namespace TedbowDrupalScripts\Command\Checkers;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
 
@@ -26,7 +27,7 @@ class PHPUnitChecker extends CheckerBase
     protected function configure()
     {
         parent::configure();
-        $this->addArgument('paths', InputArgument::IS_ARRAY, 'Paths to test',[]);
+        $this->addOption('paths', null, InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Paths to test');
     }
 
 
@@ -46,7 +47,9 @@ class PHPUnitChecker extends CheckerBase
         }*/
 
 
-        $paths = $input->getArgument('paths');
+        if ($input->hasOption('paths')) {
+            $paths = $input->getOption('paths');
+        }
         if (empty($paths)) {
             $paths = $this->getTestPathsForDiff();
         }

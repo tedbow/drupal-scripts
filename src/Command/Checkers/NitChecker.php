@@ -12,6 +12,10 @@ class NitChecker extends CheckerBase
     use UtilsTrait;
 
     protected static $defaultName = "checker:nits";
+
+    protected static $requireAtRoot = FALSE;
+
+
     /**
      * @inheritDoc
      */
