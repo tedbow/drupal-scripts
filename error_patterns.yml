@@ -5,7 +5,7 @@
 'Camelcase var': '/^\s*\$[a-z]*([A-Z])/'
 'nonCamelCase prop': '/(protected|public|private) \$[a-z]*_/'
 'camel case without scope': '/[^(protected|public|private)] \$[a-z]*([A-Z])/'
-'no return type': '/(protected|public|private) function .*(?<!__construct)\(.*\)[^\:]/'
+'no return type': '/(protected|public|private)(| static) function .*(?<!__construct)\(.*\)[^\:]/'
 'id not cap': '/ [iI]d([^(a-z|=)])/'
 'ids not cap': '/ [iI]ds([^a-z])/'
 'yml space': '/\[ /'
@@ -22,3 +22,4 @@
 'nonsense': '/(to as)/'
 'is_null call, use === NULL': '/is_null\(/'
 '==, Always use === ': '/ == /'
+'conjucation comma': '/^(,|\/|\*) but/'
