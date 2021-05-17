@@ -179,7 +179,7 @@ class CommandBase extends Command
      *
      * @return string[]
      */
-    protected function shell_exec_split($string) {
+    protected static function shell_exec_split($string) {
         $output = shell_exec($string);
         $output = preg_split('/\n+/', trim($output));
         $output = array_map(function ($line) {

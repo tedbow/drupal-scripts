@@ -19,11 +19,24 @@ class IssueBranch extends CommandBase
     protected function configure()
     {
         parent::configure();
+        $this->setAliases(['branch', 'br']);
         $this->addArgument('issue_number', InputArgument::OPTIONAL, 'The issue number');
         $this->addArgument('head', InputArgument::OPTIONAL, 'Which base to rebase against');
     }
 
-
+    /**
+     * @param string $options
+     * @param false $excludeCurrent
+     *
+     * @return string[]
+     */
+    protected function getBranchList(string $options, $excludeCurrent = FALSE) {
+        $branches = $this->shell_exec_split("git branch $options");
+        $branches = array_map(function ($branch) {
+            return trim(str_replace('* ', '', $branch));
+        }, $branches);
+        return $branches;
+    }
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         if (self::FAILURE === parent::execute($input, $output)) {
@@ -31,7 +44,7 @@ class IssueBranch extends CommandBase
         }
         $issueNumber = $input->getArgument('issue_number');
         if (!$issueNumber) {
-            $sorted_branches = $this->shell_exec_split('git branch --sort=-committerdate');
+            $sorted_branches = $this->getBranchList('--sort=-committerdate');
             $issues = [];
             foreach ($sorted_branches as $sorted_branch) {
                 $issue = $this->getBranchIssue($sorted_branch);
@@ -57,10 +70,7 @@ class IssueBranch extends CommandBase
         }
 
         $output->writeln("✍️ Title: " . $this->getEntityInfo($issueNumber)->title);
-        $branches = $this->shell_exec_split("git branch --l \*$issueNumber\* --sort=-committerdate");
-        $branches = array_map(function ($branch) {
-            return trim(str_replace('* ', '', $branch));
-        }, $branches);
+        $branches = $this->getBranchList("--l \*$issueNumber\* --sort=-committerdate");
         $current_branch = $this->getCurrentBranch();
 
         if ($branches) {

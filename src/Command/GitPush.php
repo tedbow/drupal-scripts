@@ -27,6 +27,7 @@ class GitPush extends CommandBase
     protected function configure()
     {
         parent::configure();
+        $this->setAliases(['push']);
         $this->addOption('force', null, InputOption::VALUE_NONE, 'Force option to pass on to git push command.');
         $this->addArgument('pass_on',InputArgument::IS_ARRAY, 'Arguments to pass on to git push command.');
         $this->addTestRunOptions();

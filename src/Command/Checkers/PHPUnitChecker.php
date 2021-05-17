@@ -54,6 +54,7 @@ class PHPUnitChecker extends CheckerBase
             $paths = $this->getTestPathsForDiff();
         }
         $all_pass = true;
+        $this->style->info("running test for: " . implode("\n", $paths));
         foreach ($paths as $path) {
             if (!$this->runTestForPath($path)) {
                 $all_pass = FALSE;

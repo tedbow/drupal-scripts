@@ -11,6 +11,17 @@ class IssueInfo extends CommandBase
 {
 
     protected static $defaultName = "issue:info";
+
+    /**
+     * @inheritDoc
+     */
+    protected function configure()
+    {
+        parent::configure();
+        $this->setAliases(['info']);
+    }
+
+
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         if (self::FAILURE === parent::execute($input, $output)) {

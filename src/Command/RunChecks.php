@@ -31,6 +31,7 @@ class RunChecks extends CommandBase
         }
         if ($skipTests = $input->getOption('skip')) {
             $skipTests = explode(',', $skipTests);
+            $this->style->warning('skipping tests=' . implode(', ', $skipTests));
         }
         $diffPoint = $this->getDiffPoint();
         if (empty($diffPoint)) {
