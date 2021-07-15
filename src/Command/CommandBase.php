@@ -19,6 +19,24 @@ class CommandBase extends Command
 
     protected static $requireAtRoot = TRUE;
 
+    private static function getIssueInString(?string $branch): ?string
+    {
+        if ($branch) {
+            $parts = explode('-', $branch);
+            foreach ($parts as $part) {
+                if (is_numeric($part)) {
+                    // always use first numeric
+                    if ((int) $part < 2000) {
+                        return null;
+                    }
+                    return $part;
+
+                }
+            }
+        }
+        return null;
+    }
+
     /**
      * @inheritDoc
      */
@@ -91,11 +109,9 @@ class CommandBase extends Command
             $branch = $this->getCurrentBranch();
             $useCurrent = true;
         }
-        $issue = explode('-', $branch)[0];
-        if (!is_numeric($issue) || (int) $issue < 2000) {
-            if ($useCurrent) {
-                print "probably not issue number $issue\n";
-            }
+        $issue = static::getIssueInString($branch);
+        if ($issue === null && $useCurrent) {
+            print "probably not issue number $branch\n";
             return '';
         }
         return $issue;
@@ -193,11 +209,17 @@ class CommandBase extends Command
     protected function getMergeBase():?string {
         static $mergeBase = false;
         if ($mergeBase === false) {
-            $current_branch = $this->getCurrentBranch();
-            $issue_branch = $this->getNodeBranch();
-            if (!($current_branch && $issue_branch)) {
-                throw new \Exception("current branch or issue not found");
+            if ($current_branch = $this->getCurrentBranch()) {
+                $issue_branch = $this->getNodeBranch();
+                if (!$issue_branch) {
+                    throw new \Exception("issue not in branch found");
+                }
             }
+            else {
+                throw new \Exception("current branch  not found");
+            }
+
+
             $commit = trim(shell_exec("git merge-base $issue_branch $current_branch"));
             $mergeBase = $commit ?? NULL;
         }

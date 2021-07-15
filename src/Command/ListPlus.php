@@ -49,7 +49,9 @@ class ListPlus extends ListCommand
             $noArgCommands[$name] = $command;
         }
         $q = new QuestionHelper($input, $output);
-        $choice = $q->ask($input, $output, new ChoiceQuestion("Run?", array_keys($noArgCommands)));
+        $choices = array_keys($noArgCommands);
+        asort($choices);
+        $choice = $q->ask($input, $output, new ChoiceQuestion("Run?", $choices));
         $command = $noArgCommands[$choice];
         $command->run($input, $output);
         return self::SUCCESS;

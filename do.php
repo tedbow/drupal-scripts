@@ -11,11 +11,13 @@ use TedbowDrupalScripts\Command\DiffStatus;
 use TedbowDrupalScripts\Command\GitPush;
 use TedbowDrupalScripts\Command\GitRmBranch;
 use TedbowDrupalScripts\Command\IssueBranch;
+use TedbowDrupalScripts\Command\IssueDiffs;
 use TedbowDrupalScripts\Command\IssueFollowers;
 use TedbowDrupalScripts\Command\IssueInfo;
 use TedbowDrupalScripts\Command\ListPlus;
 use TedbowDrupalScripts\Command\NewCodeBase;
 use TedbowDrupalScripts\Command\RunChecks;
+use TedbowDrupalScripts\Command\SeleniumServer;
 use TedbowDrupalScripts\Command\XdebugOn;
 use TedbowDrupalScripts\ScriptApplication;
 
@@ -32,6 +34,8 @@ $app->add(new XdebugOn());
 $app->add(new ListPlus());
 $app->add(new CreatePatch());
 $app->add(new IssueFollowers());
+$app->add(new SeleniumServer());
+$app->add(new IssueDiffs());
 
 // Add the checker commands in the order they should run.
 $app->add(new NitChecker());

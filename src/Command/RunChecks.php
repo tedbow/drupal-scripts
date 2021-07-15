@@ -47,7 +47,6 @@ class RunChecks extends CommandBase
                 continue;
             }
             $this->style->info('Running ' . $checkerName);
-
             if ($checker->execute($input, $output, $diffPoint) === self::FAILURE) {
                 $this->style->error("Failed: " . $checkerName);
                 return self::FAILURE;

@@ -9,17 +9,15 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
+use TedbowDrupalScripts\Command\SeleniumTrait;
 
 class PHPUnitChecker extends CheckerBase
 {
+    use SeleniumTrait;
 
     protected const CONFIRM_XDEBUG = true;
     protected static $defaultName = "checker:phpunit";
 
-    /**
-     * @var \Symfony\Component\Process\Process
-     */
-    protected $seleniumServerProcess = null;
 
     /**
      * @inheritDoc
@@ -27,6 +25,7 @@ class PHPUnitChecker extends CheckerBase
     protected function configure()
     {
         parent::configure();
+        $this->setAliases(['phpunit']);
         $this->addOption('paths', null, InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Paths to test');
     }
 
@@ -61,11 +60,7 @@ class PHPUnitChecker extends CheckerBase
             }
         }
 
-        if ($this->seleniumServerProcess) {
-            $this->style->info('closing');
-            $this->seleniumServerProcess->stop(1);
-            $this->style->info('closed');
-        }
+        $this->stopSelenium();
         putenv("BROWSERTEST_OUTPUT_DIRECTORY=$output_directory");
         return $all_pass;
     }
@@ -132,15 +127,6 @@ class PHPUnitChecker extends CheckerBase
         return $paths;
     }
 
-    /**
-     * Start selenium-server for JavaScript tests if not started.
-     */
-    private function startSelenium()
-    {
-        if ($this->seleniumServerProcess === null) {
-            $this->seleniumServerProcess = new Process(['selenium-server', '-port', '4444']);
-            $this->seleniumServerProcess->start();
-            $this->style->info('started selenium');
-        }
-    }
+
+
 }

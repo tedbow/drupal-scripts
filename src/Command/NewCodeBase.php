@@ -21,8 +21,11 @@ class NewCodeBase extends CommandBase
         }
         system("rm -rf vendor && composer install");
         if ($this->isGitStatusClean()) {
-            system('composer require drush/drush');
-            system('git reset --h');
+            if ($this->style->confirm("Install drush?")) {
+                system('composer require drush/drush');
+                system('git reset --h');
+            }
+
         }
         else {
             $this->style->warning('drush not installed because git is not clean.');
