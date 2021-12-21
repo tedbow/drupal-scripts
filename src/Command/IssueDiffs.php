@@ -7,6 +7,11 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * Applies issue interdiffs to an issue branch.
+ *
+ * Not needed for merge requests.
+ */
 class IssueDiffs extends CommandBase
 {
 
@@ -28,10 +33,15 @@ class IssueDiffs extends CommandBase
         $this->style->info(static::shellExecSplit('git log --pretty=format:"%s - %aI" --max-count=1')[0]);
 
         $diffs = $this->getIssueFiles($issueNumber, '/interdiff/');
+      if (empty($diffs)) {
+        $this->style->info("No diffs on issue $issueNumber");
+        return self::SUCCESS;
+      }
         $diffNames = [];
         foreach ($diffs as $diff) {
             $diffNames[] = $diff->name;
         }
+
         $choice = $this->style->choice('Apply diffs from?', $diffNames);
 
         foreach ($diffs as $i => $diff) {

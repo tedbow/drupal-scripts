@@ -11,6 +11,9 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
+/**
+ * Creates a branch based on patch for an issue.
+ */
 class IssueBranch extends CommandBase
 {
     protected static $defaultName = 'issue:branch';
