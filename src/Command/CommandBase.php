@@ -300,4 +300,23 @@ class CommandBase extends Command
         return true;
     }
 
+    protected function getDrupalRoot(): string {
+      $originial_dir = getcwd();
+      if ($this->isAtRoot()) {
+        return getcwd();
+      }
+      $top_dir = Settings::getRequiredSetting("top_dir");
+      $dir = getcwd();
+      while (!$this->isAtRoot()) {
+
+        if (strpos($dir, $top_dir) !== 0){
+          throw new \Exception("beyond top dir $top_dir");
+        }
+        chdir('..');
+        $dir = getcwd();
+        $this->style->info("dir = $dir");
+      }
+      chdir($originial_dir);
+      return $dir;
+    }
 }

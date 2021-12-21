@@ -78,10 +78,14 @@ class IssueBranch extends CommandBase
                 $this->style->warning("🚨 Currently on already on branch for this issue: $current_branch");
             }
             $list = $branches;
+            $list['c'] = 'Create new branch from another patch';
             $list['x'] = 'Do not switch. Exit';
             $branch = $this->style->choice('which branch to checkout? (sorted by most recent commit)', $list);
             if ($branch === 'x') {
                 return self::SUCCESS;
+            }
+            if ($branch === 'c') {
+              return $this->createNewBranch($issueNumber, $input);
             }
             $branch = $branches[$branch];
             $this->style->info('You have just selected: ' . $branch);
@@ -105,27 +109,7 @@ class IssueBranch extends CommandBase
         }
         else {
             $this->style->warning("🚨 No existing branch for issue!");
-            if ($patches = $this->getIssueFiles($issueNumber, '/\.patch/')) {
-
-                $list = [];
-                foreach ($patches as $patch) {
-                    $list[] = $patch->name;
-                }
-                $list['x'] = 'Do not create a branch, going to use merge request instead';
-                $current_head = $this->getCurrentHead($input);
-                $choice = $this->style->choice("Create a new branch from patch against $current_head using patch?", $list);
-                if ($choice === 'x') {
-                    $this->style->info('Merge request, right on!');
-                }
-                system("new-branch.sh {$patches[$choice]->url} $current_head");
-                return self::SUCCESS;
-            }
-            else {
-                $this->style->warning("😱 No patches!");
-                return self::FAILURE;
-            }
-
-
+          return $this->createNewBranch($issueNumber, $input);
         }
     }
 
@@ -137,6 +121,35 @@ class IssueBranch extends CommandBase
         }
         return $current_head;
     }
+
+  /**
+   * @param $issueNumber
+   * @param \Symfony\Component\Console\Input\InputInterface $input
+   *
+   * @return int
+   */
+  protected function createNewBranch($issueNumber, InputInterface $input): int {
+    if ($patches = $this->getIssueFiles($issueNumber, '/\.patch/')) {
+
+      $list = [];
+      foreach ($patches as $patch) {
+        $list[] = $patch->name;
+      }
+      $list['x'] = 'Do not create a branch, going to use merge request instead';
+      $current_head = $this->getCurrentHead($input);
+      $choice = $this->style->choice("Create a new branch from patch against $current_head using patch?",
+        $list);
+      if ($choice === 'x') {
+        $this->style->info('Merge request, right on!');
+      }
+      system("new-branch.sh {$patches[$choice]->url} $current_head");
+      return self::SUCCESS;
+    }
+    else {
+      $this->style->warning("😱 No patches!");
+      return self::FAILURE;
+    }
+  }
 
 
 }

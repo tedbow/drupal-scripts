@@ -10,6 +10,7 @@ use TedbowDrupalScripts\Settings;
 class IssueInfo extends CommandBase
 {
 
+  protected const REQUIRE_CLEAN_GIT = FALSE;
     protected static $defaultName = "issue:info";
 
     /**

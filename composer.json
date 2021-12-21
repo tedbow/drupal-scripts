@@ -7,7 +7,8 @@
         "ext-json": "*",
         "symfony/yaml": "^5.2",
         "symfony/process": "^5.2",
-        "ext-pcntl": "*"
+        "ext-pcntl": "*",
+        "symfony/filesystem": "^5.3"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.5",
