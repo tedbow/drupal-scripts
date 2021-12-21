@@ -5,6 +5,9 @@ namespace TedbowDrupalScripts;
 
 use Symfony\Component\Console\Style\SymfonyStyle;
 
+/**
+ * Just spices up messages.
+ */
 class FunStyle extends SymfonyStyle
 {
 
