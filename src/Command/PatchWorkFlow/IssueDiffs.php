@@ -22,6 +22,7 @@ class IssueDiffs extends CommandBase
     {
         parent::configure();
         $this->setAliases(['diffs']);
+        $this->setDescription('Applies interdiffs for a patch issue');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)

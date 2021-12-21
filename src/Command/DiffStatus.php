@@ -25,6 +25,7 @@ class DiffStatus extends CommandBase
     protected function configure()
     {
         parent::configure();
+        $this->setDescription('Shows diff against patch branch or since merge request started.');
         $this->addArgument('mode', InputArgument::OPTIONAL, 'full or name', 'name');
         $this->addArgument('file_pattern', InputArgument::OPTIONAL, 'The file/directory pattern to search for.', '');
         $this->addOption('head', null, InputOption::VALUE_REQUIRED);

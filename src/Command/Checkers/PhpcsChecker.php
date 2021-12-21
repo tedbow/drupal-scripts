@@ -17,6 +17,15 @@ class PhpcsChecker extends CheckerBase
    */
     protected $defaultRun = false;
 
+  /**
+   * @inheritDoc
+   */
+    protected function configure()
+    {
+        parent::configure();
+        $this->setDescription('Runs PHPCS and optionally phpcbf');
+    }
+
     /**
      * {@inheritdoc}
      */

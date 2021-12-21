@@ -14,8 +14,17 @@ class NitChecker extends CheckerBase
 
     protected static $requireAtRoot = false;
 
+  /**
+   * @inheritDoc
+   */
+    protected function configure()
+    {
+        parent::configure();
+        $this->setDescription('Checks for common nits defined in error_patterns.yml');
+    }
 
-    /**
+
+  /**
      * @inheritDoc
      */
     protected function doCheck(InputInterface $input, OutputInterface $output): bool

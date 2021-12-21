@@ -15,6 +15,16 @@ class GitRmBranch extends CommandBase
 
     protected static $defaultName = 'git:rm_branch';
 
+  /**
+   * @inheritDoc
+   */
+    protected function configure()
+    {
+        parent::configure();
+        $this->setDescription('Remove current branch');
+    }
+
+
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         if (self::FAILURE === parent::execute($input, $output)) {

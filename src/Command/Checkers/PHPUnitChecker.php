@@ -25,6 +25,7 @@ class PHPUnitChecker extends CheckerBase
     {
         parent::configure();
         $this->setAliases(['phpunit']);
+        $this->setDescription('Runs phpunit test for changed tests. All unit tests for changed modules');
         $this->addOption('paths', null, InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Paths to test');
     }
 

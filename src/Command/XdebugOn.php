@@ -21,6 +21,7 @@ class XdebugOn extends CommandBase
     protected function configure()
     {
         parent::configure();
+        $this->setDescription('Checks xdebug status');
         $this->setAliases(['x']);
     }
 
@@ -29,7 +30,7 @@ class XdebugOn extends CommandBase
     {
         parent::execute($input, $output);
         $this->style->info(
-            ini_get('xdebug.default_enable') ?
+            static::isXdebugOn() ?
             "Xdebug is on." :
             "Xdebug is NOT on."
         );

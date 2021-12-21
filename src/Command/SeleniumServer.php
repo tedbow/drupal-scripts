@@ -26,6 +26,7 @@ class SeleniumServer extends CommandBase implements SignalableCommandInterface
     {
         parent::configure();
         $this->setAliases(['sel']);
+        $this->setDescription('Starts the SeleniumServer for JS tests');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)

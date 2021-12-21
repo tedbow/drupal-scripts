@@ -19,6 +19,7 @@ class IssueBranch extends CommandBase
     {
         parent::configure();
         $this->setAliases(['branch', 'br']);
+        $this->setDescription('Creates branch based off a patch for an issue');
         $this->addArgument('issue_number', InputArgument::OPTIONAL, 'The issue number');
         $this->addArgument('head', InputArgument::OPTIONAL, 'Which base to rebase against');
     }

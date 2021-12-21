@@ -7,6 +7,12 @@
  * This will stop 'git push' from working directly unless
  * 1. The remote name is specifed in the  'remotes_ignore' setting.
  * 2. A '.pre-push' file is present.
+ *
+ * To push instead run:
+ *
+ * @code do.php git:push
+ *
+ * @see \TedbowDrupalScripts\Command\GitPush
  */
 
 use TedbowDrupalScripts\Settings;

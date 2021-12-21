@@ -14,6 +14,17 @@ class CoreCheck extends CheckerBase
     protected static $defaultName = "checker:core";
 
     protected static $requireAtRoot = false;
+
+  /**
+   * @inheritDoc
+   */
+    protected function configure()
+    {
+        parent::configure();
+        $this->setDescription('Runs commit-code-check.sh');
+    }
+
+
   /**
    * @inheritDoc
    */

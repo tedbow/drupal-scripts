@@ -31,6 +31,7 @@ class ListPlus extends ListCommand
         parent::execute($input, $output);
         $noArgCommands = [];
         $allAliases = [];
+        $choiceTexts = [];
         foreach ($this->getApplication()->all() as $name => $command) {
             // If commands are always listed before their aliases this will work.
             $allAliases = array_merge($allAliases, $command->getAliases());
@@ -44,11 +45,12 @@ class ListPlus extends ListCommand
                 }
             }
             $noArgCommands[$name] = $command;
+            $choiceTexts[] = $name . ($command->getDescription() ? ' : ' . $command->getDescription() : '');
         }
         $q = new QuestionHelper($input, $output);
         $choices = array_keys($noArgCommands);
         //asort($choices);
-        $choice = $q->ask($input, $output, new ChoiceQuestion("Run?", $choices));
+        $choice = $q->ask($input, $output, new ChoiceQuestion("Run?", $choiceTexts));
         $command = $noArgCommands[$choice];
         $command->run($input, $output);
         return self::SUCCESS;

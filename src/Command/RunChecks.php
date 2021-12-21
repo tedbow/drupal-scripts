@@ -21,6 +21,7 @@ class RunChecks extends CommandBase
     {
         parent::configure();
         $this->addTestRunOptions();
+        $this->setDescription("Runs all checkers");
     }
 
 

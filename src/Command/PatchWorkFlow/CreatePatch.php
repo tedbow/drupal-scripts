@@ -24,6 +24,7 @@ class CreatePatch extends CommandBase
     {
         parent::configure();
         $this->setAliases(['patch']);
+        $this->setDescription('Creates a patch and optionally an interdiff for an issue');
         $this->addOption('force', null, InputOption::VALUE_NONE, 'Force option to pass on to git push command.');
         $this->addArgument('pass_on', InputArgument::IS_ARRAY, 'Arguments to pass on to git push command.');
         $this->addTestRunOptions();

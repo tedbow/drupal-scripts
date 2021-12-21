@@ -301,7 +301,7 @@ class CommandBase extends Command
         /** @var \TedbowDrupalScripts\ScriptApplication $app */
         $app = $this->getApplication();
         // If running calling other commands only run this check once.
-        if (static::CONFIRM_XDEBUG && !$app->isXdebugConfirmed() && ini_get('xdebug.mode') === "debug") {
+        if (static::CONFIRM_XDEBUG && !$app->isXdebugConfirmed() && static::isXdebugOn()) {
             $app->setXdebugConfirmed();
             return $this->style->confirm("️Xdebug is on, tests & composer will take longer! Continue?", false);
         }
@@ -332,5 +332,15 @@ class CommandBase extends Command
         }
         chdir($originial_dir);
         return $dir;
+    }
+
+  /**
+   * Determines is xdebug is on.
+   *
+   * @return bool
+   */
+    protected static function isXdebugOn(): bool
+    {
+        return ini_get('xdebug.mode') === "debug";
     }
 }

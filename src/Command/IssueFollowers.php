@@ -20,6 +20,7 @@ class IssueFollowers extends CommandBase
     {
         parent::configure();
         $this->setAliases(['fw']);
+        $this->setDescription('Show issue followers');
         $this->addArgument('issue_number', InputArgument::OPTIONAL, 'The issue number');
     }
 

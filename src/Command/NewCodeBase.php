@@ -13,6 +13,16 @@ class NewCodeBase extends CommandBase
 
     protected const REQUIRE_CLEAN_GIT = false;
 
+  /**
+   * @inheritDoc
+   */
+    protected function configure()
+    {
+        parent::configure();
+        $this->setDescription('Composer reinstall and install drush. Leaves git clean.');
+    }
+
+
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         if (self::FAILURE === parent::execute($input, $output)) {

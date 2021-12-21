@@ -17,7 +17,17 @@ class CSpellChecker extends CheckerBase
    */
     protected $defaultRun = false;
 
-    /**
+  /**
+   * @inheritDoc
+   */
+    protected function configure()
+    {
+        parent::configure();
+        $this->setDescription('Runs cspell');
+    }
+
+
+  /**
      * @inheritDoc
      */
     protected function doCheck(InputInterface $input, OutputInterface $output): bool

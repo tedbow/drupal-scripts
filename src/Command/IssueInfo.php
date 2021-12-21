@@ -19,6 +19,7 @@ class IssueInfo extends CommandBase
     protected function configure()
     {
         parent::configure();
+        $this->setDescription('Get basic issue info');
         $this->setAliases(['info']);
     }
 
