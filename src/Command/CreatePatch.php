@@ -49,10 +49,10 @@ class CreatePatch extends CommandBase
         $this->style->info("✂️ Creating patch $patch_name\n\n");
         // shell_exec("git diff $current_head -C35 > /Users/ted.bowman/sites/$patch_name");
         $this->style->warning("command " . "git diff $base > /Users/ted.bowman/sites/$patch_name");
-        static::shell_exec_split("git diff $base > /Users/ted.bowman/sites/$patch_name");
+        static::shellExecSplit("git diff $base > /Users/ted.bowman/sites/$patch_name");
 
-        $display_lines = static::shell_exec_split('git log --pretty=format:"%s - %aI" --max-count=15');
-        $log_lines = static::shell_exec_split('git log --pretty=format:"%H" --max-count=15');
+        $display_lines = static::shellExecSplit('git log --pretty=format:"%s - %aI" --max-count=15');
+        $log_lines = static::shellExecSplit('git log --pretty=format:"%H" --max-count=15');
         array_shift($log_lines);
         array_shift($display_lines);
         // Look if last commit is from actual core

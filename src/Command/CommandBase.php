@@ -200,7 +200,7 @@ class CommandBase extends Command
      *
      * @return string[]
      */
-    protected static function shell_exec_split($string)
+    protected static function shellExecSplit($string)
     {
         $output = shell_exec($string);
         $output = preg_split('/\n+/', trim($output));
@@ -288,15 +288,20 @@ class CommandBase extends Command
      */
     protected function getDiffFiles(string $diffPoint): array
     {
-        return $this->shell_exec_split("git diff $diffPoint --name-only");
+        return $this->shellExecSplit("git diff $diffPoint --name-only");
     }
 
+  /**
+   * Confirms running with xdebug on.
+   *
+   * @return bool
+   */
     protected function confirmXedbug(): bool
     {
         /** @var \TedbowDrupalScripts\ScriptApplication $app */
         $app = $this->getApplication();
         // If running calling other commands only run this check once.
-        if (static::CONFIRM_XDEBUG && !$app->isXdebugConfirmed() && ini_get('xdebug.default_enable')) {
+        if (static::CONFIRM_XDEBUG && !$app->isXdebugConfirmed() && ini_get('xdebug.mode') === "debug") {
             $app->setXdebugConfirmed();
             return $this->style->confirm("️Xdebug is on, tests & composer will take longer! Continue?", false);
         }

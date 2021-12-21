@@ -21,7 +21,7 @@ class NitChecker extends CheckerBase
     protected function doCheck(InputInterface $input, OutputInterface $output): bool
     {
         $diff_command = "git diff " . $this->diffPoint;
-        $diff_output = $this->shell_exec_split($diff_command);
+        $diff_output = $this->shellExecSplit($diff_command);
         $current_file = '';
         $last_error_file = '';
         $error_patterns = $this->getErrorPatterns();

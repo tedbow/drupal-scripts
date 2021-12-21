@@ -31,7 +31,7 @@ class IssueBranch extends CommandBase
      */
     protected function getBranchList(string $options, $excludeCurrent = false)
     {
-        $branches = $this->shell_exec_split("git branch $options");
+        $branches = $this->shellExecSplit("git branch $options");
         $branches = array_map(function ($branch) {
             return trim(str_replace('* ', '', $branch));
         }, $branches);

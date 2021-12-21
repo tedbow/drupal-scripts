@@ -25,7 +25,7 @@ class IssueDiffs extends CommandBase
         }
         $issueNumber = $this->getBranchIssue();
         $this->style->info('Last commit');
-        $this->style->info(static::shell_exec_split('git log --pretty=format:"%s - %aI" --max-count=1')[0]);
+        $this->style->info(static::shellExecSplit('git log --pretty=format:"%s - %aI" --max-count=1')[0]);
 
         $diffs = $this->getIssueFiles($issueNumber, '/interdiff/');
         $diffNames = [];
@@ -42,7 +42,7 @@ class IssueDiffs extends CommandBase
             $temp = tmpfile();
             fwrite($temp, $diffContents);
             $tmpfile_path = stream_get_meta_data($temp)['uri'];
-            static::shell_exec_split("git apply $tmpfile_path ");
+            static::shellExecSplit("git apply $tmpfile_path ");
             if ($this->isGitStatusClean()) {
                 print "🔥 Didn't apply\n";
                 exit(1);

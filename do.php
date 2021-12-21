@@ -37,7 +37,6 @@ $app->add(new CreatePatch());
 $app->add(new IssueFollowers());
 $app->add(new SeleniumServer());
 $app->add(new IssueDiffs());
-$app->add(new Scratch());
 
 // Add the checker commands in the order they should run.
 $app->add(new NitChecker());

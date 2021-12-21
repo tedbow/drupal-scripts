@@ -22,7 +22,7 @@ class PhpcsChecker extends CheckerBase
         $this->style->info("root = $drupal_root");
         foreach ($this->getDiffFiles($this->diffPoint) as $getDiffFile) {
             if (in_array(pathinfo($getDiffFile)['extension'], $exts)) {
-                $output = $this->shell_exec_split("composer run phpcs $getDiffFile");
+                $output = $this->shellExecSplit("composer run phpcs $getDiffFile");
                 if ($output) {
                     $phpcs_error_files[] = $getDiffFile;
                     $phpcs_out = array_merge($phpcs_out, $output);
