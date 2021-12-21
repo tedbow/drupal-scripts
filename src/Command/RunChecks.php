@@ -40,9 +40,9 @@ class RunChecks extends CommandBase
         $checkers = $this->getApplication()->all('checker');
         /** @var \TedbowDrupalScripts\Command\Checkers\CheckerBase $checker */
         foreach ($checkers as $checker) {
-          if (!$checker->isDefaultRun()) {
-            continue;
-          }
+            if (!$checker->isDefaultRun()) {
+                continue;
+            }
             $checkerName = $checker->getName();
             $shortName = explode(':', $checkerName)[1];
             if ($skipTests && in_array($shortName, $skipTests)) {
@@ -53,15 +53,12 @@ class RunChecks extends CommandBase
             if ($checker->execute($input, $output, $diffPoint) === self::FAILURE) {
                 $this->style->error("Failed: " . $checkerName);
                 if ($this->style->choice('Ignore Failure?', ['no' => 'no', 'yes' => 'yes'], 'no') === 'no') {
-                  return self::FAILURE;
+                    return self::FAILURE;
                 }
-              $this->style->warning("️Ignored " . $checkerName);
-
+                $this->style->warning("️Ignored " . $checkerName);
+            } else {
+                $this->style->info("Passed " . $checkerName);
             }
-            else {
-              $this->style->info("Passed " . $checkerName);
-            }
-
         }
         return self::SUCCESS;
     }

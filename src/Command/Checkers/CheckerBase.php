@@ -30,9 +30,10 @@ abstract class CheckerBase extends CommandBase
    *
    * @return bool
    */
-  public function isDefaultRun(): bool {
-    return $this->defaultRun;
-  }
+    public function isDefaultRun(): bool
+    {
+        return $this->defaultRun;
+    }
 
   /**
      * @inheritDoc
@@ -57,10 +58,10 @@ abstract class CheckerBase extends CommandBase
         }
         $this->diffPoint = $diffPoint;
         if (!$this->doCheck($input, $output)) {
-          if ($calledDirect) {
-            $this->style->error("Checker failed: " . $this->getName());
-          }
-          return self::FAILURE;
+            if ($calledDirect) {
+                $this->style->error("Checker failed: " . $this->getName());
+            }
+            return self::FAILURE;
         }
         if ($calledDirect) {
             $this->style->note("Checker passed: " . $this->getName());

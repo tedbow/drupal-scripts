@@ -34,10 +34,10 @@ class IssueDiffs extends CommandBase
         $this->style->info(static::shellExecSplit('git log --pretty=format:"%s - %aI" --max-count=1')[0]);
 
         $diffs = $this->getIssueFiles($issueNumber, '/interdiff/');
-      if (empty($diffs)) {
-        $this->style->info("No diffs on issue $issueNumber");
-        return self::SUCCESS;
-      }
+        if (empty($diffs)) {
+            $this->style->info("No diffs on issue $issueNumber");
+            return self::SUCCESS;
+        }
         $diffNames = [];
         foreach ($diffs as $diff) {
             $diffNames[] = $diff->name;

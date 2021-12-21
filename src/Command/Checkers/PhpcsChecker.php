@@ -15,7 +15,7 @@ class PhpcsChecker extends CheckerBase
    *
    * Do not run be because CoreCheck covers this.
    */
-  protected $defaultRun = FALSE;
+    protected $defaultRun = false;
 
     /**
      * {@inheritdoc}
