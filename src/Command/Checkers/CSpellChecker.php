@@ -9,6 +9,14 @@ class CSpellChecker extends CheckerBase
 {
 
     protected static $defaultName = "checker:cspell";
+
+  /**
+   * {@inheritdoc}
+   *
+   * Do not run be because CoreCheck covers this.
+   */
+  protected $defaultRun = FALSE;
+
     /**
      * @inheritDoc
      */

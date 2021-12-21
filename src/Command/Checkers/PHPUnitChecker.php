@@ -2,13 +2,14 @@
 
 namespace TedbowDrupalScripts\Command\Checkers;
 
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Process\Process;
 use TedbowDrupalScripts\Command\SeleniumTrait;
 
+/**
+ * Run phpunit tests.
+ */
 class PHPUnitChecker extends CheckerBase
 {
     use SeleniumTrait;
@@ -89,7 +90,16 @@ class PHPUnitChecker extends CheckerBase
     /**
      * Get the paths to run for the current diff.
      *
-     * @return array
+     * Tests that will be run.
+     *
+     * 1. Unit test for any module that is changed.
+     * 2. Any test that is directly changed.
+     *
+     * @todo Run any test where @coversDefaultClass class has changed and test
+     *   is not in the existing list.
+     *
+     * @return string[]
+     *   The test paths that will be run.
      */
     private function getTestPathsForDiff(): array
     {

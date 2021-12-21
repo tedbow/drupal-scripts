@@ -308,6 +308,12 @@ class CommandBase extends Command
         return true;
     }
 
+  /**
+   * Gets the root directory of the drupal project.
+   *
+   * @return string
+   * @throws \Exception
+   */
     protected function getDrupalRoot(): string
     {
         $originial_dir = getcwd();

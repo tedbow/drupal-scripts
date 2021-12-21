@@ -18,7 +18,23 @@ abstract class CheckerBase extends CommandBase
      */
     protected $diffPoint;
 
-    /**
+  /**
+   * Whether to run in the default group.
+   *
+   * @var bool
+   */
+    protected $defaultRun = true;
+
+  /**
+   * Determines if the checker should be run in the default group.
+   *
+   * @return bool
+   */
+  public function isDefaultRun(): bool {
+    return $this->defaultRun;
+  }
+
+  /**
      * @inheritDoc
      */
     protected function configure()
@@ -41,7 +57,10 @@ abstract class CheckerBase extends CommandBase
         }
         $this->diffPoint = $diffPoint;
         if (!$this->doCheck($input, $output)) {
-            return self::FAILURE;
+          if ($calledDirect) {
+            $this->style->error("Checker failed: " . $this->getName());
+          }
+          return self::FAILURE;
         }
         if ($calledDirect) {
             $this->style->note("Checker passed: " . $this->getName());

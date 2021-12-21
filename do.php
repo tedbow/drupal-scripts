@@ -2,6 +2,7 @@
 <?php
 require_once __DIR__ . '/vendor/autoload.php';
 
+use TedbowDrupalScripts\Command\Checkers\CoreCheck;
 use TedbowDrupalScripts\Command\Checkers\CSpellChecker;
 use TedbowDrupalScripts\Command\Checkers\NitChecker;
 use TedbowDrupalScripts\Command\Checkers\PhpcsChecker;
@@ -43,6 +44,7 @@ $app->add(new NitChecker());
 $app->add(new PhpcsChecker());
 $app->add(new CSpellChecker());
 $app->add(new PHPUnitChecker());
+$app->add(new CoreCheck());
 $app->setCatchExceptions(false);
 $app->setDefaultCommand('listplus');
 $app->run();

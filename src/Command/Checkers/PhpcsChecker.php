@@ -10,6 +10,13 @@ class PhpcsChecker extends CheckerBase
     protected static $requireAtRoot = false;
     protected static $defaultName = "checker:phpcs";
 
+  /**
+   * {@inheritdoc}
+   *
+   * Do not run be because CoreCheck covers this.
+   */
+  protected $defaultRun = FALSE;
+
     /**
      * {@inheritdoc}
      */
