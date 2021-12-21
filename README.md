@@ -1,15 +1,15 @@
-## Drupal Core develop console
+# Tedbow Drupal Core Development Console Command
 
-# Purpose
+## Purpose
 This Symfony console is intended run checks on Drupal core development to make developing easier.
 
 
-# Instructions
+## Instructions
 1. `composer install`
 2. add `do.php` to your PATH
 3. To enforce checks before `git push` see `pre-push.php`.
 
-# Current commands
+## Current commands
 * issue:info : Get basic issue info
 * issue:branch : Creates branch based off a patch for an issue
 * run:checks : Runs all checkers
