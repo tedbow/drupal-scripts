@@ -3,7 +3,6 @@
 
 namespace TedbowDrupalScripts\Command;
 
-
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -17,7 +16,7 @@ class CommandBase extends Command
     // Commands that will take a lot longer if xdebug is enabled should confirm.
     protected const CONFIRM_XDEBUG = false;
 
-    protected static $requireAtRoot = TRUE;
+    protected static $requireAtRoot = true;
 
     private static function getIssueInString(?string $branch): ?string
     {
@@ -30,7 +29,6 @@ class CommandBase extends Command
                         return null;
                     }
                     return $part;
-
                 }
             }
         }
@@ -85,15 +83,16 @@ class CommandBase extends Command
         return self::SUCCESS;
     }
 
-    protected function isGitStatusClean(?OutputInterface $output = NULL) {
+    protected function isGitStatusClean(?OutputInterface $output = null)
+    {
         $status_output = shell_exec('git status');
-        if (strpos($status_output, 'nothing to commit, working tree clean') === FALSE) {
+        if (strpos($status_output, 'nothing to commit, working tree clean') === false) {
             if ($output) {
                 $output->write($status_output);
             }
-            return FALSE;
+            return false;
         }
-        return TRUE;
+        return true;
     }
 
 
@@ -103,7 +102,8 @@ class CommandBase extends Command
      *
      * @return string
      */
-    protected function getBranchIssue(string $branch = null): string {
+    protected function getBranchIssue(string $branch = null): string
+    {
         $useCurrent = false;
         if (!$branch) {
             $branch = $this->getCurrentBranch();
@@ -117,7 +117,8 @@ class CommandBase extends Command
         return $issue;
     }
 
-    protected function getCurrentBranch() {
+    protected function getCurrentBranch()
+    {
         return trim(shell_exec('git rev-parse --abbrev-ref HEAD'));
     }
 
@@ -127,7 +128,8 @@ class CommandBase extends Command
      *
      * @return mixed
      */
-    protected function getEntityInfo($issue, $type = 'node'): \stdClass {
+    protected function getEntityInfo($issue, $type = 'node'): \stdClass
+    {
         static $infos = [];
         if (!isset($infos[$issue])) {
             $url = "https://www.drupal.org/api-d7/$type/$issue.json";
@@ -136,33 +138,36 @@ class CommandBase extends Command
         return $infos[$issue];
     }
 
-    protected function getURLDecodedJson(string $url) {
+    protected function getURLDecodedJson(string $url)
+    {
         return json_decode(file_get_contents($url));
     }
 
-    protected function getTimeFromTimeStamp($timestamp) {
+    protected function getTimeFromTimeStamp($timestamp)
+    {
         $dt = new \DateTime("now", new \DateTimeZone(Settings::getSetting('timezone'))); //first argument "must" be a string
         $dt->setTimestamp($timestamp); //adjust the object to correct timestamp
         //echo $dt->format('d.m.Y, H:i:s');
         return $dt->format('d.m.Y, H:i:s');
     }
 
-    protected function getIssueStatus($status_code) {
+    protected function getIssueStatus($status_code)
+    {
         $statuses = [
-          '1' => 'active',
-          '2' => 'fixed',
-          '3' => 'closed (duplicate)',
-          '4' => 'postponed',
-          '5' => 'closed (won\'t fix)',
-          '6' => 'closed (works as designed)',
-          '7' => 'closed (fixed)',
-          '8' => 'needs review',
-          '13' => 'needs work',
-          '14' => 'reviewed & tested by the community',
-          '15' => 'patch (to be ported)',
-          '16' => 'postponed (maintainer needs more info)',
-          '17' => 'closed (outdated)',
-          '18' => 'closed (cannot reproduce)',
+            '1' => 'active',
+            '2' => 'fixed',
+            '3' => 'closed (duplicate)',
+            '4' => 'postponed',
+            '5' => 'closed (won\'t fix)',
+            '6' => 'closed (works as designed)',
+            '7' => 'closed (fixed)',
+            '8' => 'needs review',
+            '13' => 'needs work',
+            '14' => 'reviewed & tested by the community',
+            '15' => 'patch (to be ported)',
+            '16' => 'postponed (maintainer needs more info)',
+            '17' => 'closed (outdated)',
+            '18' => 'closed (cannot reproduce)',
         ];
         return $statuses[$status_code];
     }
@@ -174,7 +179,8 @@ class CommandBase extends Command
      * @return string
      *   The branch the issue is against.
      */
-    protected  function getNodeBranch($issue = NULL) {
+    protected function getNodeBranch($issue = null)
+    {
         if (empty($issue)) {
             $issue = $this->getBranchIssue();
         }
@@ -182,11 +188,10 @@ class CommandBase extends Command
             return '';
         }
         $version = $this->getEntityInfo($issue)->field_issue_version;
-        if (strpos($version, '-dev') !== FALSE ) {
+        if (strpos($version, '-dev') !== false) {
             return str_replace('-dev', '', $version);
         }
         return '';
-
     }
 
     /**
@@ -195,7 +200,8 @@ class CommandBase extends Command
      *
      * @return string[]
      */
-    protected static function shell_exec_split($string) {
+    protected static function shell_exec_split($string)
+    {
         $output = shell_exec($string);
         $output = preg_split('/\n+/', trim($output));
         $output = array_map(function ($line) {
@@ -203,10 +209,10 @@ class CommandBase extends Command
         }, $output);
 
         return array_filter($output);
-
     }
 
-    protected function getMergeBase():?string {
+    protected function getMergeBase():?string
+    {
         static $mergeBase = false;
         if ($mergeBase === false) {
             if ($current_branch = $this->getCurrentBranch()) {
@@ -214,26 +220,25 @@ class CommandBase extends Command
                 if (!$issue_branch) {
                     throw new \Exception("issue not in branch found");
                 }
-            }
-            else {
+            } else {
                 throw new \Exception("current branch  not found");
             }
 
 
             $commit = trim(shell_exec("git merge-base $issue_branch $current_branch"));
-            $mergeBase = $commit ?? NULL;
+            $mergeBase = $commit ?? null;
         }
         return $mergeBase;
     }
 
-    protected function getDiffPoint(): ?string {
+    protected function getDiffPoint(): ?string
+    {
         static $diffPoint = false;
         if ($diffPoint === false) {
             $mergeBase = $this->getMergeBase();
             if ($mergeBase) {
                 $diffPoint = $mergeBase;
-            }
-            else {
+            } else {
                 $diffPoint = $this->getNodeBranch();
             }
         }
@@ -243,22 +248,20 @@ class CommandBase extends Command
     /**
      * @param $issue
      */
-    protected function getIssueFiles($issue, $pattern): array {
+    protected function getIssueFiles($issue, $pattern): array
+    {
         $node_info = $this->getEntityInfo($issue);
         if (empty($node_info->field_issue_files)) {
             return [];
-        }
-        else {
+        } else {
             $files = [];
             foreach ($node_info->field_issue_files as $file_info) {
-
                 if ($file_info->display) {
                     $file = $this->getURLDecodedJson($file_info->file->uri . '.json');
                     if (preg_match($pattern, $file->name)) {
                         $files[] = $file;
                     }
                 }
-
             }
             return $files;
         }
@@ -272,10 +275,10 @@ class CommandBase extends Command
         foreach (['index.php', 'update.php'] as $file) {
             if (!file_exists($file)) {
                 $this->style->error("Missing file: $file");
-                return FALSE;
+                return false;
             }
         }
-        return TRUE;
+        return true;
     }
 
     /**
@@ -286,10 +289,10 @@ class CommandBase extends Command
     protected function getDiffFiles(string $diffPoint): array
     {
         return $this->shell_exec_split("git diff $diffPoint --name-only");
-
     }
 
-    protected function confirmXedbug(): bool {
+    protected function confirmXedbug(): bool
+    {
         /** @var \TedbowDrupalScripts\ScriptApplication $app */
         $app = $this->getApplication();
         // If running calling other commands only run this check once.
@@ -300,23 +303,23 @@ class CommandBase extends Command
         return true;
     }
 
-    protected function getDrupalRoot(): string {
-      $originial_dir = getcwd();
-      if ($this->isAtRoot()) {
-        return getcwd();
-      }
-      $top_dir = Settings::getRequiredSetting("top_dir");
-      $dir = getcwd();
-      while (!$this->isAtRoot()) {
-
-        if (strpos($dir, $top_dir) !== 0){
-          throw new \Exception("beyond top dir $top_dir");
+    protected function getDrupalRoot(): string
+    {
+        $originial_dir = getcwd();
+        if ($this->isAtRoot()) {
+            return getcwd();
         }
-        chdir('..');
+        $top_dir = Settings::getRequiredSetting("top_dir");
         $dir = getcwd();
-        $this->style->info("dir = $dir");
-      }
-      chdir($originial_dir);
-      return $dir;
+        while (!$this->isAtRoot()) {
+            if (strpos($dir, $top_dir) !== 0) {
+                throw new \Exception("beyond top dir $top_dir");
+            }
+            chdir('..');
+            $dir = getcwd();
+            $this->style->info("dir = $dir");
+        }
+        chdir($originial_dir);
+        return $dir;
     }
 }

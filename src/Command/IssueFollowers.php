@@ -3,7 +3,6 @@
 
 namespace TedbowDrupalScripts\Command;
 
-
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -46,6 +45,4 @@ class IssueFollowers extends CommandBase
         $this->style->info("followers: " . implode(', ', $followerNames));
         return self::SUCCESS;
     }
-
-
 }

@@ -11,7 +11,8 @@ use Symfony\Component\Console\Input\InputOption;
 trait RunTestsTrait
 {
 
-    protected function addTestRunOptions() {
+    protected function addTestRunOptions()
+    {
         $this->addOption('skip', 's', InputOption::VALUE_REQUIRED, 'Tests to skip separated by commas.');
     }
 }

@@ -10,7 +10,7 @@ use TedbowDrupalScripts\Settings;
 class IssueInfo extends CommandBase
 {
 
-  protected const REQUIRE_CLEAN_GIT = FALSE;
+    protected const REQUIRE_CLEAN_GIT = false;
     protected static $defaultName = "issue:info";
 
     /**
@@ -51,18 +51,14 @@ class IssueInfo extends CommandBase
                 $comment = array_pop($comments);
                 $important['my last comment'] = $this->getTimeFromTimeStamp($comment->created);
                 //$important['my last comment'] = $important_last_comment['created'] = date("Y-m-d H:i:s", $comment->created);
-
             }
             $output->writeln("⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐");
-            $output->write(print_r($important, TRUE));
+            $output->write(print_r($important, true));
             $output->writeln("⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐");
             return self::SUCCESS;
-
-        }
-        else {
+        } else {
             $this->style->warning('Could not find issue for branch');
             return self::FAILURE;
         }
     }
-
 }

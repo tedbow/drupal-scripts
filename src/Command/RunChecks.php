@@ -9,8 +9,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 class RunChecks extends CommandBase
 {
     use RunTestsTrait;
-    protected const REQUIRE_CLEAN_GIT = FALSE;
-    protected const CONFIRM_XDEBUG = TRUE;
+    protected const REQUIRE_CLEAN_GIT = false;
+    protected const CONFIRM_XDEBUG = true;
 
     protected static $defaultName = 'run:checks';
 
@@ -54,8 +54,5 @@ class RunChecks extends CommandBase
             $this->style->info("Passed " . $checkerName);
         }
         return self::SUCCESS;
-
     }
-
-
 }

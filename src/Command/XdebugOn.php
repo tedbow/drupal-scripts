@@ -3,7 +3,6 @@
 
 namespace TedbowDrupalScripts\Command;
 
-
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -13,7 +12,7 @@ class XdebugOn extends CommandBase
     // Commands that will take a lot longer if xdebug is enabled should confirm.
     protected const CONFIRM_XDEBUG = false;
 
-    protected static $requireAtRoot = FALSE;
+    protected static $requireAtRoot = false;
     protected static $defaultName = 'xdebug';
 
     /**
@@ -30,12 +29,10 @@ class XdebugOn extends CommandBase
     {
         parent::execute($input, $output);
         $this->style->info(
-          ini_get('xdebug.default_enable') ?
+            ini_get('xdebug.default_enable') ?
             "Xdebug is on." :
             "Xdebug is NOT on."
         );
         return self::SUCCESS;
     }
-
-
 }

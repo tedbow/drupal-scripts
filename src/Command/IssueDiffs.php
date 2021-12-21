@@ -3,7 +3,6 @@
 
 namespace TedbowDrupalScripts\Command;
 
-
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -51,12 +50,10 @@ class IssueDiffs extends CommandBase
             system('git add .');
             system('git status');
             system("git commit -am '➕ {$diff->url}'");
-
         }
 
 
 
         return self::SUCCESS;
     }
-
 }

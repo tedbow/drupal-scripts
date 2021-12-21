@@ -3,7 +3,6 @@
 
 namespace TedbowDrupalScripts\Command;
 
-
 use Symfony\Component\Process\Process;
 
 trait SeleniumTrait

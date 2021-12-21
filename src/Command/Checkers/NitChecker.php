@@ -2,7 +2,6 @@
 
 namespace TedbowDrupalScripts\Command\Checkers;
 
-
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use TedbowDrupalScripts\UtilsTrait;
@@ -13,7 +12,7 @@ class NitChecker extends CheckerBase
 
     protected static $defaultName = "checker:nits";
 
-    protected static $requireAtRoot = FALSE;
+    protected static $requireAtRoot = false;
 
 
     /**
@@ -26,7 +25,7 @@ class NitChecker extends CheckerBase
         $current_file = '';
         $last_error_file = '';
         $error_patterns = $this->getErrorPatterns();
-        $found_error = FALSE;
+        $found_error = false;
         $warnings = [];
         foreach ($diff_output as $diff_line) {
             if (strpos($diff_line, '+++ b/') === 0) {
@@ -40,7 +39,7 @@ class NitChecker extends CheckerBase
                             $last_error_file = $current_file;
                         }
                         $warnings[$current_file] .= "\n⚠️ $problem: $diff_line";
-                        $found_error = TRUE;
+                        $found_error = true;
                     }
                 }
             }

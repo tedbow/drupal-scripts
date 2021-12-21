@@ -7,30 +7,31 @@ use Symfony\Component\Yaml\Yaml;
 /**
  * Common functions for getting settings from yml files.
  */
-abstract class SettingsBase {
+abstract class SettingsBase
+{
 
-  use UtilsTrait;
+    use UtilsTrait;
 
   /**
    * The settings file.
    *
    * @var string
    */
-  const FILE = '';
+    const FILE = '';
 
   /**
    * Get all settings.
    *
    * @return array
    */
-  public static function getSettings() {
-    static $settings;
-    if (!isset($settings)) {
-      $settings = Yaml::parseFile(static::getBaseDir() . '/' . static::FILE);
+    public static function getSettings()
+    {
+        static $settings;
+        if (!isset($settings)) {
+            $settings = Yaml::parseFile(static::getBaseDir() . '/' . static::FILE);
+        }
+        return $settings;
     }
-    return $settings;
-
-  }
 
   /**
    * Gets an individual setting.
@@ -40,10 +41,11 @@ abstract class SettingsBase {
    *
    * @return mixed|null
    */
-  public static function getSetting(string $key, $default = NULL) {
-    $settings = static::getSettings();
-    return isset($settings[$key]) ? $settings[$key] : $default;
-  }
+    public static function getSetting(string $key, $default = null)
+    {
+        $settings = static::getSettings();
+        return isset($settings[$key]) ? $settings[$key] : $default;
+    }
 
     /**
      * Gets a require setting.
@@ -55,12 +57,12 @@ abstract class SettingsBase {
      * @throws \Exception
      *   Thrown if setting is not available.
      */
-  public static function getRequiredSetting(string $key) {
-      $setting = static::getSetting($key);
-      if ($setting === NULL) {
-          throw new \Exception("Setting $key is required");
-      }
-      return $setting;
-  }
-
+    public static function getRequiredSetting(string $key)
+    {
+        $setting = static::getSetting($key);
+        if ($setting === null) {
+            throw new \Exception("Setting $key is required");
+        }
+        return $setting;
+    }
 }

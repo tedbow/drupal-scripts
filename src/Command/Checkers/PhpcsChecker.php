@@ -2,15 +2,12 @@
 
 namespace TedbowDrupalScripts\Command\Checkers;
 
-
-
-
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class PhpcsChecker extends CheckerBase
 {
-  protected static $requireAtRoot = FALSE;
+    protected static $requireAtRoot = false;
     protected static $defaultName = "checker:phpcs";
 
     /**
@@ -36,12 +33,12 @@ class PhpcsChecker extends CheckerBase
         if ($phpcs_out) {
             print implode("\n", $phpcs_out);
             $choice = $this->style->choice(
-              'PHPcs Fail ☹️. what to do?',
-              [
-                'f' => 'Run phpcbf to fix',
-                  'i' => 'Ignore',
-                  'x' => 'Exit',
-              ]
+                'PHPcs Fail ☹️. what to do?',
+                [
+                    'f' => 'Run phpcbf to fix',
+                    'i' => 'Ignore',
+                    'x' => 'Exit',
+                ]
             );
             switch ($choice) {
                 case 'f':
@@ -55,7 +52,6 @@ class PhpcsChecker extends CheckerBase
                     return true;
                 default:
                     return false;
-
             }
         }
         return true;

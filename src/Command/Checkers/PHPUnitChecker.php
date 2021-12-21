@@ -2,8 +2,6 @@
 
 namespace TedbowDrupalScripts\Command\Checkers;
 
-
-
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -56,7 +54,7 @@ class PHPUnitChecker extends CheckerBase
         $this->style->info("running test for: " . implode("\n", $paths));
         foreach ($paths as $path) {
             if (!$this->runTestForPath($path)) {
-                $all_pass = FALSE;
+                $all_pass = false;
             }
         }
 
@@ -82,8 +80,8 @@ class PHPUnitChecker extends CheckerBase
         $output = shell_exec("vendor/bin/phpunit --configuration core $testPath");
         $this->style->write($output);
         return !(
-          strpos($output, 'Errors') !== FALSE
-          || strpos($output, 'FAILURES!') !== FALSE
+          strpos($output, 'Errors') !== false
+          || strpos($output, 'FAILURES!') !== false
           || strpos($output, 'OK, but incomplete, skipped, or risky tests!') !== false
         );
     }
@@ -108,9 +106,9 @@ class PHPUnitChecker extends CheckerBase
                     $modules_to_run[] = $module;
                 }
             }
-            if ((strpos($file, '/tests/src') !== FALSE || strpos($file, 'core/tests/Drupal') !== FALSE)
-              && strpos($file, 'Test.php') !== FALSE
-              && strpos($file, '/Unit') === FALSE) {
+            if ((strpos($file, '/tests/src') !== false || strpos($file, 'core/tests/Drupal') !== false)
+              && strpos($file, 'Test.php') !== false
+              && strpos($file, '/Unit') === false) {
                 // Run any non-unit tests that are different
                 $paths[] = $file;
             }
@@ -126,7 +124,4 @@ class PHPUnitChecker extends CheckerBase
         }
         return $paths;
     }
-
-
-
 }

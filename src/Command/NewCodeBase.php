@@ -3,7 +3,6 @@
 
 namespace TedbowDrupalScripts\Command;
 
-
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -25,12 +24,9 @@ class NewCodeBase extends CommandBase
                 system('composer require drush/drush');
                 system('git reset --h');
             }
-
-        }
-        else {
+        } else {
             $this->style->warning('drush not installed because git is not clean.');
         }
         return self::SUCCESS;
     }
-
 }

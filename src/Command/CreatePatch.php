@@ -3,7 +3,6 @@
 
 namespace TedbowDrupalScripts\Command;
 
-
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -24,7 +23,7 @@ class CreatePatch extends CommandBase
         parent::configure();
         $this->setAliases(['patch']);
         $this->addOption('force', null, InputOption::VALUE_NONE, 'Force option to pass on to git push command.');
-        $this->addArgument('pass_on',InputArgument::IS_ARRAY, 'Arguments to pass on to git push command.');
+        $this->addArgument('pass_on', InputArgument::IS_ARRAY, 'Arguments to pass on to git push command.');
         $this->addTestRunOptions();
     }
 
@@ -57,10 +56,9 @@ class CreatePatch extends CommandBase
         array_shift($log_lines);
         array_shift($display_lines);
         // Look if last commit is from actual core
-        if (strpos($display_lines[0], 'Issue #') !== FALSE) {
+        if (strpos($display_lines[0], 'Issue #') !== false) {
             print "⚠️No previous commits, no interdiff\n";
-        }
-        else {
+        } else {
             print "Which commit for interdiff?\n\n";
             print_r($display_lines);
 

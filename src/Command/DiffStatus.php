@@ -40,8 +40,7 @@ class DiffStatus extends CommandBase
         }
         if ($head = $input->getOption('head')) {
             $diffPoint = $head;
-        }
-        else {
+        } else {
             $diffPoint = $this->getDiffPoint();
         }
         $mode = $input->getArgument('mode');
@@ -57,6 +56,4 @@ class DiffStatus extends CommandBase
         $output->write($status_output);
         return self::SUCCESS;
     }
-
-
 }

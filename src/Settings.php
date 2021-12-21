@@ -9,12 +9,13 @@ namespace TedbowDrupalScripts;
  *
  * It has sensitive information.
  */
-class Settings extends SettingsBase {
+class Settings extends SettingsBase
+{
 
-  public const FILE = 'settings.yml';
+    public const FILE = 'settings.yml';
 
-  public static function isTesting() {
-    return static::getSetting('is_testing');
-  }
-
+    public static function isTesting()
+    {
+        return static::getSetting('is_testing');
+    }
 }

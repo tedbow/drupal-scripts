@@ -3,7 +3,6 @@
 
 namespace TedbowDrupalScripts\Command;
 
-
 use Symfony\Component\Console\Command\ListCommand;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
@@ -55,8 +54,5 @@ class ListPlus extends ListCommand
         $command = $noArgCommands[$choice];
         $command->run($input, $output);
         return self::SUCCESS;
-
     }
-
-
 }

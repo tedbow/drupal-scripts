@@ -3,12 +3,11 @@
 
 namespace TedbowDrupalScripts;
 
-
 use Symfony\Component\Console\Application;
 
 class ScriptApplication extends Application
 {
-    protected $xdebugConfirmed = FALSE;
+    protected $xdebugConfirmed = false;
 
     /**
      * @return bool

@@ -3,7 +3,6 @@
 
 namespace TedbowDrupalScripts\Command;
 
-
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -31,10 +30,7 @@ class GitRmBranch extends CommandBase
         if ($this->style->confirm("Delete $existing branch and switch to $branch?", false)) {
             system("git checkout $branch");
             system(" git -c diff.mnemonicprefix=false -c core.quotepath=false branch -D $existing");
-
         }
         return self::SUCCESS;
     }
-
-
 }

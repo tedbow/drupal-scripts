@@ -3,7 +3,6 @@
 
 namespace TedbowDrupalScripts\Command;
 
-
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -30,7 +29,8 @@ class IssueBranch extends CommandBase
      *
      * @return string[]
      */
-    protected function getBranchList(string $options, $excludeCurrent = FALSE) {
+    protected function getBranchList(string $options, $excludeCurrent = false)
+    {
         $branches = $this->shell_exec_split("git branch $options");
         $branches = array_map(function ($branch) {
             return trim(str_replace('* ', '', $branch));
@@ -63,7 +63,6 @@ class IssueBranch extends CommandBase
             $issueIndex = 0;
             foreach ($issues as $issue) {
                 $issue_titles[] = "#$issue: " . $this->getEntityInfo($issue)->title;
-
             }
             $title = $this->style->choice('Which issue do you want to work on?', $issue_titles);
             $issueNumber = $issues[array_search($title, $issue_titles)];
@@ -74,7 +73,7 @@ class IssueBranch extends CommandBase
         $current_branch = $this->getCurrentBranch();
 
         if ($branches) {
-            if (array_search($current_branch, $branches) !== FALSE) {
+            if (array_search($current_branch, $branches) !== false) {
                 $this->style->warning("🚨 Currently on already on branch for this issue: $current_branch");
             }
             $list = $branches;
@@ -85,17 +84,15 @@ class IssueBranch extends CommandBase
                 return self::SUCCESS;
             }
             if ($branch === 'c') {
-              return $this->createNewBranch($issueNumber, $input);
+                return $this->createNewBranch($issueNumber, $input);
             }
             $branch = $branches[$branch];
             $this->style->info('You have just selected: ' . $branch);
             shell_exec("git checkout $branch");
             if ($this->getMergeBase()) {
-
                 $this->style->info("Probably Merge request. No rebase");
                 return self::SUCCESS;
-            }
-            else {
+            } else {
                 $current_head = $this->getCurrentHead($input);
                 if ($this->style->confirm("rebase against $current_head?", false)) {
                     system("git checkout $current_head");
@@ -105,18 +102,16 @@ class IssueBranch extends CommandBase
                     return self::SUCCESS;
                 }
             }
-
-        }
-        else {
+        } else {
             $this->style->warning("🚨 No existing branch for issue!");
-          return $this->createNewBranch($issueNumber, $input);
+            return $this->createNewBranch($issueNumber, $input);
         }
     }
 
     private function getCurrentHead(InputInterface $input)
     {
         $current_head = $input->getArgument('head');
-        if ( !$current_head ) {
+        if (!$current_head) {
             $current_head = $this->getNodeBranch($input->getArgument('issue_number'));
         }
         return $current_head;
@@ -128,28 +123,27 @@ class IssueBranch extends CommandBase
    *
    * @return int
    */
-  protected function createNewBranch($issueNumber, InputInterface $input): int {
-    if ($patches = $this->getIssueFiles($issueNumber, '/\.patch/')) {
-
-      $list = [];
-      foreach ($patches as $patch) {
-        $list[] = $patch->name;
-      }
-      $list['x'] = 'Do not create a branch, going to use merge request instead';
-      $current_head = $this->getCurrentHead($input);
-      $choice = $this->style->choice("Create a new branch from patch against $current_head using patch?",
-        $list);
-      if ($choice === 'x') {
-        $this->style->info('Merge request, right on!');
-      }
-      system("new-branch.sh {$patches[$choice]->url} $current_head");
-      return self::SUCCESS;
+    protected function createNewBranch($issueNumber, InputInterface $input): int
+    {
+        if ($patches = $this->getIssueFiles($issueNumber, '/\.patch/')) {
+            $list = [];
+            foreach ($patches as $patch) {
+                $list[] = $patch->name;
+            }
+            $list['x'] = 'Do not create a branch, going to use merge request instead';
+            $current_head = $this->getCurrentHead($input);
+            $choice = $this->style->choice(
+                "Create a new branch from patch against $current_head using patch?",
+                $list
+            );
+            if ($choice === 'x') {
+                  $this->style->info('Merge request, right on!');
+            }
+            system("new-branch.sh {$patches[$choice]->url} $current_head");
+            return self::SUCCESS;
+        } else {
+            $this->style->warning("😱 No patches!");
+            return self::FAILURE;
+        }
     }
-    else {
-      $this->style->warning("😱 No patches!");
-      return self::FAILURE;
-    }
-  }
-
-
 }

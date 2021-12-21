@@ -3,7 +3,6 @@
 
 namespace TedbowDrupalScripts\Command;
 
-
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -29,7 +28,7 @@ class GitPush extends CommandBase
         parent::configure();
         $this->setAliases(['push']);
         $this->addOption('force', null, InputOption::VALUE_NONE, 'Force option to pass on to git push command.');
-        $this->addArgument('pass_on',InputArgument::IS_ARRAY, 'Arguments to pass on to git push command.');
+        $this->addArgument('pass_on', InputArgument::IS_ARRAY, 'Arguments to pass on to git push command.');
         $this->addTestRunOptions();
     }
 
@@ -56,6 +55,4 @@ class GitPush extends CommandBase
         system("git push $args_string");
         return self::SUCCESS;
     }
-
-
 }
