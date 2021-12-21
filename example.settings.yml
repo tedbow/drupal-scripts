@@ -1,0 +1,6 @@
+my_user_id: 1234
+default_head_branch: 9.4.x
+timezone: "America/New_York"
+top_dir: "/Users/user.name/sites"
+remotes_ignore:
+  - 'github'

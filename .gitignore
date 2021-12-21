@@ -1,5 +1,4 @@
 /.idea
-settings.ini
 settings.yml
 composer.lock
 /vendor/
