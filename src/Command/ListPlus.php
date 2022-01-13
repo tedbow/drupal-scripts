@@ -44,12 +44,11 @@ class ListPlus extends ListCommand
                     continue 2;
                 }
             }
-            $noArgCommands[$name] = $command;
-            $choiceTexts[] = $name . ($command->getDescription() ? ' : ' . $command->getDescription() : '');
+            $display_text = $name . ($command->getDescription() ? ' : ' . $command->getDescription() : '');
+            $noArgCommands[$display_text] = $command;
+            $choiceTexts[] = $display_text;
         }
-        $q = new QuestionHelper($input, $output);
-        $choices = array_keys($noArgCommands);
-        //asort($choices);
+        $q = new QuestionHelper();
         $choice = $q->ask($input, $output, new ChoiceQuestion("Run?", $choiceTexts));
         $command = $noArgCommands[$choice];
         $command->run($input, $output);
