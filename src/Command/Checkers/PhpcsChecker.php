@@ -5,17 +5,15 @@ namespace TedbowDrupalScripts\Command\Checkers;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * Checker that using phpcs Drupal standar with optional phpcbf fixing.
+ *
+ * "checker:core" also runs phpcs but this uses the stricter "Drupal" standard.
+ */
 class PhpcsChecker extends CheckerBase
 {
     protected static $requireAtRoot = false;
     protected static $defaultName = "checker:phpcs";
-
-  /**
-   * {@inheritdoc}
-   *
-   * Do not run be because CoreCheck covers this.
-   */
-    //protected $defaultRun = false;
 
   /**
    * @inheritDoc
@@ -48,28 +46,16 @@ class PhpcsChecker extends CheckerBase
 
         if ($phpcs_out) {
             print implode("\n", $phpcs_out);
-            $choice = $this->style->choice(
-                'PHPcs Fail ☹️. what to do?',
-                [
-                    'f' => 'Run phpcbf to fix',
-                    'i' => 'Ignore',
-                    'x' => 'Exit',
-                ]
-            );
+            $choice = $this->style->confirm('PHPcs Fail ☹️. Fix with phpcfb?');
             switch ($choice) {
                 case 'f':
                     foreach ($phpcs_error_files as $phpcs_error_file) {
-                        system("composer run phpcbf $phpcs_error_file");
+                        system("./vendor/bin/phpcbf --runtime-set installed_paths vendor/drupal/coder/coder_sniffer $phpcs_error_file --standard=Drupal");
                     }
-                    $this->style->error("☹️☹️☹️☹️☹️ PHPCS Failed ☹️☹️☹️☹️☹️");
-                    return false;
-                case 'i':
-                    $this->style->warning("💁🏼‍♂️Ignoring phpcs!\n");
-                    return true;
-                default:
-                    return false;
+                    $this->style->warning("Ran phpcbf commit changes manually");
+                    exit(1);
             }
         }
-        return true;
+        return FALSE;
     }
 }
