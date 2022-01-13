@@ -30,7 +30,7 @@ if (in_array($remote, $ignore_remotes)) {
 }
 
 if (!file_exists('.pre-push')) {
-    print "💁🏼‍♂️Use the git-push.php file.\n";
+    print "💁🏼‍♂️Use the `do.php git:push` command.\n";
     exit(1);
 }
 unlink('.pre-push');
