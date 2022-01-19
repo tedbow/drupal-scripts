@@ -2,6 +2,7 @@
 
 namespace TedbowDrupalScripts\Command\Checkers;
 
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use TedbowDrupalScripts\UtilsTrait;
@@ -21,6 +22,7 @@ class NitChecker extends CheckerBase
     {
         parent::configure();
         $this->setDescription('Checks for common nits defined in error_patterns.yml');
+        $this->addArgument('pattern', InputArgument::OPTIONAL, 'Limit to a single pattern to check');
     }
 
 
@@ -33,7 +35,7 @@ class NitChecker extends CheckerBase
         $diff_output = $this->shellExecSplit($diff_command);
         $current_file = '';
         $last_error_file = '';
-        $error_patterns = $this->getErrorPatterns();
+        $error_patterns = $this->getErrorPatterns($input);
         $found_error = false;
         $warnings = [];
         foreach ($diff_output as $diff_line) {
@@ -65,9 +67,18 @@ class NitChecker extends CheckerBase
     /**
      * @return string[]
      */
-    private function getErrorPatterns(): array
+    private function getErrorPatterns(InputInterface $input): array
     {
         $error_patterns = static::parseYml('error_patterns');
+        if ($input->hasArgument('pattern') && $pattern = $input->getArgument('pattern')) {
+          if (!isset($error_patterns[$pattern])) {
+            throw new \RuntimeException("Unknown pattern: $pattern");
+          }
+          $error_patterns = [
+            $pattern => $error_patterns[$pattern],
+          ];
+
+        }
         return $error_patterns;
     }
 }
