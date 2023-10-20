@@ -16,6 +16,7 @@ class PHPUnitChecker extends CheckerBase
 
     protected const CONFIRM_XDEBUG = true;
     protected static $defaultName = "checker:phpunit";
+    protected static $requireAtRoot = FALSE;
 
 
     /**
@@ -79,7 +80,8 @@ class PHPUnitChecker extends CheckerBase
         if (strpos($testPath, 'FunctionalJavascript') !== false) {
             $this->startSelenium();
         }
-        $output = shell_exec("vendor/bin/phpunit --configuration core $testPath");
+        $root = $this->getDrupalRoot();
+        $output = shell_exec("$root/vendor/bin/phpunit --configuration core $testPath");
         $this->style->write($output);
         return !(
           strpos($output, 'Errors') !== false
