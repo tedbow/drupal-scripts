@@ -7,10 +7,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class GitBisect extends CommandBase {
+class GitBisect extends GitBisectCommandBase {
 
-  protected static $defaultName = 'git:push';
-  protected const CONFIRM_XDEBUG = false;
+  protected static $defaultName = 'git:bisect';
 
   /**
    * @inheritDoc
@@ -20,8 +19,6 @@ class GitBisect extends CommandBase {
     parent::configure();
     $this->setAliases(['bisect']);
     $this->setDescription('Call back for git bisect run');
-    $this->addArgument('patch', InputArgument::REQUIRED, 'Patch to apply.');
-    $this->addArgument('test', InputArgument::REQUIRED, 'Test file to run.');
   }
 
   /**
@@ -29,27 +26,23 @@ class GitBisect extends CommandBase {
    */
   protected function execute(InputInterface $input, OutputInterface $output)
   {
-    $patch = realpath($input->getArgument('patch'));
-    $test = realpath($input->getArgument('test'));
-    if (!$patch || !$test) {
-      $this->style->error("Must provide files");
-      return 127;
+    $success = parent::execute($input, $output);
+    if ($success !== static::SUCCESS) {
+      return $success;
     }
     $return = NULL;
-    system("git apply $patch", $return);
+    system('git apply ' . $this->patch, $return);
     if ($return !== 0) {
       // According to git docs 125 means it can't be tested. Not sure what bisect
       // does in this case.
       return 125;
     }
-    system('rm -rf vendor');
-    system('composer install');
-
-    system("vendor/bin/phpunit --configuration core/phpunit.xml $test", $return);
-    system(" git apply -R $patch");
-    if ($return !== 0) {
+    $this->composerInstall();
+    if (!$this->runTest()) {
+      system(' git apply -R ' . $this->patch);
       return 2;
     }
+    system(' git apply -R ' . $this->patch);
     return static::SUCCESS;
   }
 

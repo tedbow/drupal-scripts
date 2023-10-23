@@ -83,7 +83,7 @@ class CommandBase extends Command
         return self::SUCCESS;
     }
 
-    protected function isGitStatusClean(?OutputInterface $output = null)
+    protected function isGitStatusClean(?OutputInterface $output = null): bool
     {
         $status_output = shell_exec('git status');
         if (strpos($status_output, 'nothing to commit, working tree clean') === false) {
@@ -93,6 +93,12 @@ class CommandBase extends Command
             return false;
         }
         return true;
+    }
+
+    protected function ensureGitClean(OutputInterface $output) {
+      if (!$this->isGitStatusClean($output)) {
+        throw new \Exception("Not clean");
+      }
     }
 
 
@@ -333,6 +339,29 @@ class CommandBase extends Command
         chdir($originial_dir);
         return $dir;
     }
+
+  /**
+   * @param mixed $patch_path
+   *
+   * @return void
+   */
+  protected function applyPatch(string $patch_path, bool $reverse = FALSE): void {
+    $options = $reverse ? ' -R ' : '';
+    $return = NULL;
+    system("git apply $options $patch_path", $return);
+    if ($return !== 0) {
+      throw new \Exception("Could not apply $options $patch_path");
+    }
+
+  }
+
+  /**
+   * @return void
+   */
+  protected function composerInstall(): void {
+    system('rm -rf vendor');
+    system('composer install');
+  }
 
   /**
    * Determines is xdebug is on.
