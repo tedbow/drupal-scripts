@@ -56,6 +56,6 @@ class PhpcsChecker extends CheckerBase
                     exit(1);
             }
         }
-        return FALSE;
+        return false;
     }
 }

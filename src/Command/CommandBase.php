@@ -95,10 +95,11 @@ class CommandBase extends Command
         return true;
     }
 
-    protected function ensureGitClean(OutputInterface $output) {
-      if (!$this->isGitStatusClean($output)) {
-        throw new \Exception("Not clean");
-      }
+    protected function ensureGitClean(OutputInterface $output)
+    {
+        if (!$this->isGitStatusClean($output)) {
+            throw new \Exception("Not clean");
+        }
     }
 
 
@@ -345,23 +346,24 @@ class CommandBase extends Command
    *
    * @return void
    */
-  protected function applyPatch(string $patch_path, bool $reverse = FALSE): void {
-    $options = $reverse ? ' -R ' : '';
-    $return = NULL;
-    system("git apply $options $patch_path", $return);
-    if ($return !== 0) {
-      throw new \Exception("Could not apply $options $patch_path");
+    protected function applyPatch(string $patch_path, bool $reverse = false): void
+    {
+        $options = $reverse ? ' -R ' : '';
+        $return = null;
+        system("git apply $options $patch_path", $return);
+        if ($return !== 0) {
+            throw new \Exception("Could not apply $options $patch_path");
+        }
     }
-
-  }
 
   /**
    * @return void
    */
-  protected function composerInstall(): void {
-    system('rm -rf vendor');
-    system('composer install');
-  }
+    protected function composerInstall(): void
+    {
+        system('rm -rf vendor');
+        system('composer install');
+    }
 
   /**
    * Determines is xdebug is on.

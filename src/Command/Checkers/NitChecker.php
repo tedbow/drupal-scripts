@@ -71,13 +71,12 @@ class NitChecker extends CheckerBase
     {
         $error_patterns = static::parseYml('error_patterns');
         if ($input->hasArgument('pattern') && $pattern = $input->getArgument('pattern')) {
-          if (!isset($error_patterns[$pattern])) {
-            throw new \RuntimeException("Unknown pattern: $pattern");
-          }
-          $error_patterns = [
-            $pattern => $error_patterns[$pattern],
-          ];
-
+            if (!isset($error_patterns[$pattern])) {
+                throw new \RuntimeException("Unknown pattern: $pattern");
+            }
+            $error_patterns = [
+                $pattern => $error_patterns[$pattern],
+            ];
         }
         return $error_patterns;
     }
