@@ -16,7 +16,7 @@ class PHPUnitChecker extends CheckerBase
 
     protected const CONFIRM_XDEBUG = true;
     protected static $defaultName = "checker:phpunit";
-    protected static $requireAtRoot = FALSE;
+    protected static $requireAtRoot = false;
 
 
     /**
