@@ -7,6 +7,18 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * Command to for git bisect callback.
+ *
+ * ```
+ * git bisect start 11.x GOOD
+ * git bisect run  do.php bisect ../bisect-try.patch core/modules/system/tests/src/Functional/Batch/ProcessingTest.php
+ * // Hopefully find bad commit.
+ * git bisect reset
+ * ```
+ *
+ * @see \TedbowDrupalScripts\Command\GitFindPass
+ */
 class GitBisect extends GitBisectCommandBase
 {
 

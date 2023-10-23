@@ -7,6 +7,15 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * Command to find last commit that passes a test when patched.
+ *
+ * ```
+ * do.php pass ../bisect-try.patch core/modules/system/tests/src/FunctionalJavascript/Batch/ProcessingTest.php
+ * ```
+ *
+ * @see \TedbowDrupalScripts\Command\GitBisect
+ */
 class GitFindPass extends GitBisectCommandBase
 {
 
