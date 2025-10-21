@@ -12,6 +12,7 @@ class IssueInfo extends CommandBase
 
     protected const REQUIRE_CLEAN_GIT = false;
     protected static $defaultName = "issue:info";
+    protected static $requireAtRoot = false;
 
     /**
      * @inheritDoc
@@ -33,6 +34,10 @@ class IssueInfo extends CommandBase
             $node_info = $this->getEntityInfo($issue);
 
             $node_info = (array) $node_info;
+            if ($this->outputJson($input)) {
+                $output->write(json_encode($node_info, JSON_PRETTY_PRINT));
+                return self::SUCCESS;
+            }
             $important_keys = ['title', 'field_issue_component', 'field_issue_version', 'comment_count', 'flag_tracker_follower_count'];
             $important = array_intersect_key($node_info, array_flip($important_keys));
             $important['last updated'] = $this->getTimeFromTimeStamp($node_info['field_issue_last_status_change']);

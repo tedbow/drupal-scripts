@@ -44,6 +44,12 @@ class CommandBase extends Command
         $this->addOption('no-tests');
         $this->addOption('no-rebase');
         $this->addOption('no-catch');
+        $this->addOption('json');
+    }
+
+    protected function outputJson(InputInterface $input): bool
+    {
+        return (bool) $input->getOption('json');
     }
 
 
