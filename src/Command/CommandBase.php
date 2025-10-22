@@ -157,7 +157,7 @@ class CommandBase extends Command
         return $dt->format('d.m.Y, H:i:s');
     }
 
-    protected function getIssueStatus($status_code)
+    protected function setIssueStatus(array &$data): void
     {
         $statuses = [
             '1' => 'active',
@@ -175,9 +175,19 @@ class CommandBase extends Command
             '17' => 'closed (outdated)',
             '18' => 'closed (cannot reproduce)',
         ];
-        return $statuses[$status_code];
+        $this->replaceIssueField($data, 'field_issue_status', $statuses);
     }
 
+    protected function setIssueCategory(array &$info): void {
+        $categories = [
+            '1' => 'Bug report',
+            '2' => 'Task',
+            '3' => 'Feature request',
+            '4' => 'Support request',
+            '5' => 'Plan',
+        ];
+        $this->replaceIssueField($info, 'field_issue_category', $categories);
+    }
     /**
      * Gets the branch an issue is against.
      * @param null|string $issue
@@ -348,5 +358,13 @@ class CommandBase extends Command
     protected static function isXdebugOn(): bool
     {
         return ini_get('xdebug.mode') === "debug";
+    }
+
+    private function replaceIssueField(array &$data, string $fieldName, array $options): void
+    {
+        \assert(isset($data[$fieldName]));
+        \assert(isset($options[$data[$fieldName]]));
+        $data[str_replace('field_', '', $fieldName)] = $options[$data[$fieldName]];
+        unset($data[$fieldName]);
     }
 }
