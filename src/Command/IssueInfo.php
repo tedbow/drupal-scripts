@@ -25,6 +25,7 @@ class IssueInfo extends CommandBase
         $this->setAliases(['info']);
         $this->addArgument('issue_number', InputArgument::OPTIONAL, 'The issue number');
         $this->addOption('comments');
+        $this->addOption('mrs');
     }
 
 

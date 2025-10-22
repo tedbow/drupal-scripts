@@ -7,6 +7,8 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
+use Symfony\Component\HttpClient\HttpClient;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 use TedbowDrupalScripts\FunStyle;
 use TedbowDrupalScripts\Settings;
 
@@ -147,6 +149,53 @@ class CommandBase extends Command
     protected function getURLDecodedJson(string $url)
     {
         return json_decode(file_get_contents($url));
+    }
+
+    /**
+     * Fetch data from GitLab API with proper headers and authentication.
+     *
+     * @param string $url The GitLab API URL
+     * @return array The decoded JSON response
+     * @throws \Exception If the request fails
+     */
+    protected function getGitLabApiData(string $url): array
+    {
+        static $httpClient = null;
+
+        if ($httpClient === null) {
+            $httpClient = HttpClient::create();
+        }
+
+        $headers = [
+            'User-Agent' => 'DrupalScripts/1.0 (Symfony HttpClient)',
+            'Accept' => 'application/json',
+        ];
+
+        // Add GitLab token if available
+        $token = Settings::getSetting('gitlab_token', null);
+        if ($token) {
+            $headers['Authorization'] = 'Bearer ' . $token;
+            // Alternative: $headers['Private-Token'] = $token;
+        }
+
+        try {
+            $response = $httpClient->request('GET', $url, [
+                'headers' => $headers,
+                'timeout' => 30,
+            ]);
+
+            if ($response->getStatusCode() !== 200) {
+                throw new \Exception(sprintf(
+                    'GitLab API request failed with status %d: %s',
+                    $response->getStatusCode(),
+                    $response->getContent(false)
+                ));
+            }
+
+            return $response->toArray();
+        } catch (\Exception $e) {
+            throw new \Exception('Failed to fetch GitLab API data: ' . $e->getMessage());
+        }
     }
 
     protected function getTimeFromTimeStamp($timestamp)

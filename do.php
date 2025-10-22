@@ -7,6 +7,7 @@ use TedbowDrupalScripts\Command\Checkers\CSpellChecker;
 use TedbowDrupalScripts\Command\Checkers\NitChecker;
 use TedbowDrupalScripts\Command\Checkers\PhpcsChecker;
 use TedbowDrupalScripts\Command\Checkers\PHPUnitChecker;
+use TedbowDrupalScripts\Command\GitLab\MergeRequestInfo;
 use TedbowDrupalScripts\Command\PatchWorkFlow\CreatePatch;
 use TedbowDrupalScripts\Command\DiffStatus;
 use TedbowDrupalScripts\Command\GitPush;
@@ -37,6 +38,8 @@ $app->add(new CreatePatch());
 $app->add(new IssueFollowers());
 $app->add(new SeleniumServer());
 $app->add(new IssueDiffs());
+
+$app->add(new MergeRequestInfo());
 
 // Add the checker commands in the order they should run.
 $app->add(new NitChecker());
