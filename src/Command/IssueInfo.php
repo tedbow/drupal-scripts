@@ -7,9 +7,11 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use TedbowDrupalScripts\Settings;
+use TedbowDrupalScripts\Traits\GitLabTrait;
 
 class IssueInfo extends CommandBase
 {
+    use GitLabTrait;
 
     protected const REQUIRE_CLEAN_GIT = false;
     protected static $defaultName = "issue:info";
@@ -55,6 +57,9 @@ class IssueInfo extends CommandBase
             $this->setTags($important);
             if ($input->getOption('comments')) {
                 $important['comments'] = $this->getIssueComments($issue);
+            }
+            if ($input->getOption('mrs')) {
+                $important['merge requests'] = $this->getProjectMrs($this->getProjectId($issue));
             }
 
             $important['last comment'] = $important_last_comment;

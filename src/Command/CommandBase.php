@@ -140,6 +140,7 @@ class CommandBase extends Command
     {
         static $infos = [];
         if (!isset($infos[$issue])) {
+            self::pause();
             $url = "https://www.drupal.org/api-d7/$type/$issue.json";
             $infos[$issue] = $this->getURLDecodedJson($url);
         }
@@ -151,52 +152,6 @@ class CommandBase extends Command
         return json_decode(file_get_contents($url));
     }
 
-    /**
-     * Fetch data from GitLab API with proper headers and authentication.
-     *
-     * @param string $url The GitLab API URL
-     * @return array The decoded JSON response
-     * @throws \Exception If the request fails
-     */
-    protected function getGitLabApiData(string $url): array
-    {
-        static $httpClient = null;
-
-        if ($httpClient === null) {
-            $httpClient = HttpClient::create();
-        }
-
-        $headers = [
-            'User-Agent' => 'DrupalScripts/1.0 (Symfony HttpClient)',
-            'Accept' => 'application/json',
-        ];
-
-        // Add GitLab token if available
-        $token = Settings::getSetting('gitlab_token', null);
-        if ($token) {
-            $headers['Authorization'] = 'Bearer ' . $token;
-            // Alternative: $headers['Private-Token'] = $token;
-        }
-
-        try {
-            $response = $httpClient->request('GET', $url, [
-                'headers' => $headers,
-                'timeout' => 30,
-            ]);
-
-            if ($response->getStatusCode() !== 200) {
-                throw new \Exception(sprintf(
-                    'GitLab API request failed with status %d: %s',
-                    $response->getStatusCode(),
-                    $response->getContent(false)
-                ));
-            }
-
-            return $response->toArray();
-        } catch (\Exception $e) {
-            throw new \Exception('Failed to fetch GitLab API data: ' . $e->getMessage());
-        }
-    }
 
     protected function getTimeFromTimeStamp($timestamp)
     {
@@ -415,5 +370,13 @@ class CommandBase extends Command
         \assert(isset($options[$data[$fieldName]]));
         $data[str_replace('field_', '', $fieldName)] = $options[$data[$fieldName]];
         unset($data[$fieldName]);
+    }
+
+    /**
+     * @return void
+     */
+    protected static function pause(): void
+    {
+        usleep(250000);
     }
 }
