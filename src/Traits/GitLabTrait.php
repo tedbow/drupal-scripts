@@ -20,7 +20,7 @@ trait GitLabTrait
         return $project_response[0]['id'];
     }
 
-    protected function getProjectMrs(string $projectId)
+    protected function getProjectMrs(string $projectId, bool $includeComments = true): array
     {
         $mr_response = $this->getGitLabApiData("https://git.drupalcode.org/api/v4/projects/project%2Fcanvas/merge_requests?state=all&source_project_id=$projectId");
         $important_keys = [
@@ -52,8 +52,10 @@ trait GitLabTrait
         foreach ($mr_response as $mr) {
             $filtered_mr = array_intersect_key($mr, array_flip($important_keys));
             $filtered_mr['diff_web_url'] = $mr['web_url'] . '.diff';
-            $filtered_mr['comments'] = $this->geMrComments($mr['target_project_id'], $mr['iid']);
-            $filtered_mr['mr_participants'] = implode(',', self::getUsersFromMrComments($filtered_mr['comments']));
+            if ($includeComments) {
+                $filtered_mr['comments'] = $this->geMrComments($mr['target_project_id'], $mr['iid']);
+                $filtered_mr['mr_participants'] = implode(',', self::getUsersFromMrComments($filtered_mr['comments']));
+            }
             $mrs[] = $filtered_mr;
         }
         return $mrs;
@@ -94,11 +96,6 @@ trait GitLabTrait
             $comments[$comment['id']] = array_intersect_key($comment, array_flip($keep_keys));
         }
         return $comments;
-    }
-
-    protected function getIssueMrs(string $issue): array
-    {
-        return $this->getProjectMrs($this->getProjectId($issue));
     }
 
     /**
