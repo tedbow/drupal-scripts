@@ -40,11 +40,7 @@ class MergeRequestInfo extends CommandBase
         try {
             $mrs = $this->getProjectMrs($this->getProjectId($issue), $includeComments);
 
-
-            if ($this->outputJson($input)) {
-                $output->write(json_encode($mrs, JSON_PRETTY_PRINT));
-                return self::SUCCESS;
-            }
+            $output->write(json_encode($mrs, JSON_PRETTY_PRINT));
             return self::SUCCESS;
         } catch (\Exception $e) {
             $this->style->error($e->getMessage());
