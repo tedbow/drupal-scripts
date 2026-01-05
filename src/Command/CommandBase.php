@@ -182,7 +182,8 @@ class CommandBase extends Command
         $this->replaceIssueField($data, 'field_issue_status', $statuses);
     }
 
-    protected function setIssueCategory(array &$info): void {
+    protected function setIssueCategory(array &$info): void
+    {
         $categories = [
             '1' => 'Bug report',
             '2' => 'Task',

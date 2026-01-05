@@ -110,6 +110,9 @@ class IssueInfo extends CommandBase
             foreach ($comments_response['list'] as $comment) {
                 //var_dump($comment);
                 //exit();
+                if ($comment->name === "System Message" || ($comment->comment_body->value ?? '') === '') {
+                    continue;
+                }
                 $comments[$comment->cid] = [
                     'author' => $comment->name,
                     'comment' => $comment->comment_body->value ?? '',
@@ -120,9 +123,8 @@ class IssueInfo extends CommandBase
                 $nextUrl = $comments_response['next'];
                 $nextUrl = str_replace('comment?', 'comment.json?', $nextUrl);
                 $comments_response = (array) json_decode(file_get_contents($nextUrl));
-            }
-            else {
-                $comments_response = NULL;
+            } else {
+                $comments_response = null;
             }
         } while ($comments_response);
 

@@ -51,6 +51,7 @@ trait GitLabTrait
         $mrs = [];
         foreach ($mr_response as $mr) {
             $filtered_mr = array_intersect_key($mr, array_flip($important_keys));
+            self::filterUserInfo($filtered_mr);
             $filtered_mr['diff_web_url'] = $mr['web_url'] . '.diff';
             if ($includeComments) {
                 $filtered_mr['comments'] = $this->geMrComments($mr['target_project_id'], $mr['iid']);
@@ -61,12 +62,20 @@ trait GitLabTrait
         return $mrs;
     }
 
+    private static function filterUserInfo(array &$data): void
+    {
+        foreach ($data as &$item) {
+            if (is_array($item) && isset($item['username']) && isset($item['name']) && isset($item['public_email'])) {
+                $item = $item['username'];
+            }
+        }
+    }
+
     private static function getUsersFromMrComments(array $comments): array
     {
         $users = [];
         foreach ($comments as $comment) {
-            $author = $comment['author'];
-            $users[] = $author['username'];
+            $users[] = $comment['author'];
         }
         return array_unique($users);
     }
@@ -83,7 +92,6 @@ trait GitLabTrait
             'created_at',
             'updated_at',
             'position',
-            'resolvable',
             'resolved',
             'resolved_by',
             'resolved_at',
@@ -94,6 +102,10 @@ trait GitLabTrait
                 continue;
             }
             $comments[$comment['id']] = array_intersect_key($comment, array_flip($keep_keys));
+            self::filterUserInfo($comments[$comment['id']]);
+            if (isset($comments[$comment['id']]['position'])) {
+                unset($comments[$comment['id']]['position']['base_sha'], $comments[$comment['id']]['position']['start_sha'], $comments[$comment['id']]['position']['head_sha']);
+            }
         }
         return $comments;
     }
@@ -105,7 +117,7 @@ trait GitLabTrait
      * @return array The decoded JSON response
      * @throws \Exception If the request fails
      */
-    protected function getGitLabApiData(string $url, ?string $page = NULL): array
+    protected function getGitLabApiData(string $url, ?string $page = null): array
     {
         static $httpClient = null;
 
@@ -119,8 +131,7 @@ trait GitLabTrait
         ];
         if ($page) {
             $pagedUrl = $url . (str_contains($url, '?') ? "&page=$page" : "?page=$page");
-        }
-        else {
+        } else {
             $pagedUrl = $url;
         }
 
