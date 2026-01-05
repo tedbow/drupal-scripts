@@ -3,6 +3,7 @@
 
 namespace TedbowDrupalScripts\Command;
 
+use League\HTMLToMarkdown\HtmlConverter;
 use Neckberg\Hashdown\Hashdown;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -140,6 +141,9 @@ class IssueInfo extends CommandBase
 
     protected function outputMarkdown(array $data, OutputInterface $output)
     {
+        $htmlConverter = new HtmlConverter();
+        $md_summary = $htmlConverter->convert($data['summary']);
+        $data['summary'] = 'SUMMARY TOKEN';
         $orig_comments = $data['comments'] ?? [];
         $data['comments'] = [];
 
@@ -156,13 +160,21 @@ class IssueInfo extends CommandBase
                 'Author' => $mr['author'],
             ];
             $mr['comments'] = $mr['comments'] ?? [];
-            $new_mr['Comments'] = [];
+            $new_mr['Comment Threads'] = [];
             foreach ($mr['comments'] as $comment) {
-                $new_mr['Comments'][] = "{$comment['author']} ({$comment['created_at']}): " . str_replace(['\n', '```'], '', strip_tags($comment['body']));
+                $thread_id = $comment['position']['new_line'] ?? 'general';
+                if (!isset($new_mr['Comment Threads'][$thread_id])) {
+                    $new_mr['Comment Threads'][$thread_id] = [];
+                }
+                $new_mr['Comment Threads'][$thread_id][] = "{$comment['author']} ({$comment['created_at']}): " . str_replace(['\n', '```'], '', strip_tags($comment['body']));
             }
+            $new_mr['Comment Threads'] = array_values($new_mr['Comment Threads']);
             $data['merge requests']["{$mr['title']}: ({$mr['state']}"] = $new_mr;
         }
-        parent::outputMarkdown($data, $output);
+        $md = Hashdown::s_stringify_x($data, false,TRUE);
+        $md = str_replace('SUMMARY TOKEN', $md_summary, $md);
+        $output->write($md);
+        return self::SUCCESS;
     }
 
 
