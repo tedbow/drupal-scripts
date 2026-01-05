@@ -3,8 +3,10 @@
 
 namespace TedbowDrupalScripts\Command;
 
+use Neckberg\Hashdown\Hashdown;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
 use Symfony\Component\HttpClient\HttpClient;
@@ -46,12 +48,17 @@ class CommandBase extends Command
         $this->addOption('no-tests');
         $this->addOption('no-rebase');
         $this->addOption('no-catch');
-        $this->addOption('json');
+        $this->addOption('format', null, InputOption::VALUE_REQUIRED);
     }
 
     protected function outputJson(InputInterface $input): bool
     {
-        return (bool) $input->getOption('json');
+        return $input->getOption('format') === 'json';
+    }
+
+    protected function outputMarkdown(array $data, OutputInterface $output)
+    {
+        $output->write(Hashdown::s_stringify_x($data, false,TRUE));
     }
 
 

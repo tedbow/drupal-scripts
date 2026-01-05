@@ -3,6 +3,7 @@
 
 namespace TedbowDrupalScripts\Command;
 
+use Neckberg\Hashdown\Hashdown;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -42,7 +43,8 @@ class IssueInfo extends CommandBase
             $node_info = $this->getEntityInfo($issue);
 
             $node_info = (array) $node_info;
-            $important_keys = ['title', 'field_issue_component', 'body', 'field_issue_version', 'comment_count', 'flag_tracker_follower_count', 'field_issue_category', 'field_issue_status', 'taxonomy_vocabulary_9', 'author', 'field_issue_related_links'];
+            // Need field_issue_version, author, flag_tracker_follower_count?
+            $important_keys = ['title', 'field_issue_component', 'body', 'comment_count', 'field_issue_category', 'field_issue_status', 'taxonomy_vocabulary_9', 'field_issue_related_links'];
             $important = array_intersect_key($node_info, array_flip($important_keys));
             $important['last updated'] = $this->getTimeFromTimeStamp($node_info['field_issue_last_status_change']);
             $important['summary'] = $important['body']->value;
@@ -54,6 +56,7 @@ class IssueInfo extends CommandBase
             $this->setIssueCategory($important);
             //$important['created by'] = $node_info['author'];
             $last_comment = (array) $this->getEntityInfo($node_info['comments'][$important['comment_count'] - 1]->id, 'comment');
+            unset($important['comment_count']);
             $important_keys = ['name'];
             $important_last_comment = array_intersect_key($last_comment, array_flip($important_keys));
             $important_last_comment['created'] =$this->getTimeFromTimeStamp($last_comment['created']);
@@ -74,6 +77,10 @@ class IssueInfo extends CommandBase
                 $comment = array_pop($comments);
                 $important['my last comment'] = $this->getTimeFromTimeStamp($comment->created);
                 //$important['my last comment'] = $important_last_comment['created'] = date("Y-m-d H:i:s", $comment->created);
+            }
+            if ($input->getOption('format') === 'md') {
+                $this->outputMarkdown($important, $output);
+                return self::SUCCESS;
             }
             if ($this->outputJson($input)) {
                 $output->write(json_encode($important, JSON_PRETTY_PRINT));
@@ -130,4 +137,33 @@ class IssueInfo extends CommandBase
 
         return $comments;
     }
+
+    protected function outputMarkdown(array $data, OutputInterface $output)
+    {
+        $orig_comments = $data['comments'] ?? [];
+        $data['comments'] = [];
+
+        foreach ($orig_comments as $comment) {
+            $data['comments']["{$comment['author']} ({$comment['created']})"] = strip_tags($comment['comment']);
+        }
+        $orig_mrs = $data['merge requests'] ?? [];
+        $data['merge requests'] = [];
+        foreach ($orig_mrs as $mr) {
+            $new_mr = [
+                'URL' => $mr['web_url'],
+                'Created at' => $mr['created_at'],
+                'Updated at' => $mr['updated_at'],
+                'Author' => $mr['author'],
+            ];
+            $mr['comments'] = $mr['comments'] ?? [];
+            $new_mr['Comments'] = [];
+            foreach ($mr['comments'] as $comment) {
+                $new_mr['Comments'][] = "{$comment['author']} ({$comment['created_at']}): " . str_replace(['\n', '```'], '', strip_tags($comment['body']));
+            }
+            $data['merge requests']["{$mr['title']}: ({$mr['state']}"] = $new_mr;
+        }
+        parent::outputMarkdown($data, $output);
+    }
+
+
 }
