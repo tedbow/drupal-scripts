@@ -42,10 +42,13 @@ class IssueInfo extends CommandBase
             $node_info = $this->getEntityInfo($issue);
 
             $node_info = (array) $node_info;
-            $important_keys = ['title', 'field_issue_component', 'body', 'field_issue_version', 'comment_count', 'flag_tracker_follower_count', 'field_issue_category', 'field_issue_status', 'taxonomy_vocabulary_9', 'author'];
+            $important_keys = ['title', 'field_issue_component', 'body', 'field_issue_version', 'comment_count', 'flag_tracker_follower_count', 'field_issue_category', 'field_issue_status', 'taxonomy_vocabulary_9', 'author', 'field_issue_related_links'];
             $important = array_intersect_key($node_info, array_flip($important_keys));
             $important['last updated'] = $this->getTimeFromTimeStamp($node_info['field_issue_last_status_change']);
             $important['summary'] = $important['body']->value;
+            $important['field_issue_related_links'] = array_map(function ($link) {
+                return $link->url;
+            }, $important['field_issue_related_links']);
             unset($important['body']);
             $this->setIssueStatus($important);
             $this->setIssueCategory($important);
