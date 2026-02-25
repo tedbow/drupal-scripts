@@ -79,8 +79,34 @@ class IssueCheckout extends CommandBase
             }
 
             $branchName = $selectedMr['source_branch'];
+            $targetBranch = $selectedMr['target_branch'];
             $this->style->info("Selected MR: {$selectedMr['title']}");
             $this->style->info("Branch: $branchName");
+            $this->style->info("Target: $targetBranch");
+
+            // Update local target branch from origin
+            $this->style->info("Updating local $targetBranch from origin...");
+            $currentBranch = trim(shell_exec("git branch --show-current") ?? '');
+            if ($currentBranch === $targetBranch) {
+                // We're on the target branch, use git pull
+                $pullOutput = shell_exec("git pull origin $targetBranch 2>&1");
+                if ($pullOutput && (strpos($pullOutput, 'fatal:') !== false || strpos($pullOutput, 'error:') !== false)) {
+                    $this->style->warning("Could not pull $targetBranch: $pullOutput");
+                } else {
+                    $this->style->success("Pulled latest $targetBranch from origin");
+                }
+            } else {
+                // Not on target branch, update it directly
+                $updateCommand = "git fetch origin $targetBranch:$targetBranch 2>&1";
+                $updateOutput = shell_exec($updateCommand);
+                if ($updateOutput && strpos($updateOutput, 'fatal:') !== false) {
+                    // Fallback: just update the remote tracking branch
+                    $this->style->warning("Could not update local $targetBranch, updating remote tracking branch instead");
+                    shell_exec("git fetch origin $targetBranch 2>&1");
+                } else {
+                    $this->style->success("Updated local $targetBranch from origin");
+                }
+            }
 
             // Construct the remote name and URL following Drupal.org pattern
             // The project path is already "issue/canvas-3562879" format
