@@ -48,23 +48,23 @@ class IssueCheckout extends CommandBase
             // Get all MRs for the project
             $allMrs = $this->getProjectMrs($projectId, false);
 
-            // Filter for only open MRs
+            // Show all MRs for the project
             $openMrs = array_filter($allMrs, function ($mr) {
                 return $mr['state'] === 'opened';
             });
 
-            if (empty($openMrs)) {
+            if (empty($allMrs)) {
                 $this->style->warning("No open merge requests found for issue $issue");
                 return self::FAILURE;
             }
 
             // If multiple open MRs, let user choose
             $selectedMr = null;
-            if (count($openMrs) > 1) {
+            if (count($allMrs) > 1) {
                 $choices = [];
-                foreach ($openMrs as $mr) {
+                foreach ($allMrs as $mr) {
                     $draftLabel = $mr['draft'] ? '[DRAFT] ' : '';
-                    $choices[] = $draftLabel . $mr['title'];
+                    $choices[] = $draftLabel . "MR !{$mr['iid']} ({$mr['state']}): " . $mr['title'];
                 }
 
                 $selectedTitle = $this->style->choice(
@@ -73,7 +73,7 @@ class IssueCheckout extends CommandBase
                 );
 
                 $selectedIndex = array_search($selectedTitle, $choices);
-                $selectedMr = array_values($openMrs)[$selectedIndex];
+                $selectedMr = array_values($allMrs)[$selectedIndex];
             } else {
                 $selectedMr = reset($openMrs);
             }
