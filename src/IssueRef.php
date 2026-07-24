@@ -3,7 +3,7 @@
 namespace TedbowDrupalScripts;
 
 /**
- * An issue reference parsed from a bare number or an issue URL.
+ * An issue reference parsed from a bare number, an issue URL, or an MR URL.
  *
  * Supported forms:
  *  - 3591785
@@ -11,6 +11,7 @@ namespace TedbowDrupalScripts;
  *  - https://drupal.org/i/3591785
  *  - https://git.drupalcode.org/project/canvas/-/work_items/3591785
  *  - https://git.drupalcode.org/project/canvas/-/issues/3591785
+ *  - https://git.drupalcode.org/project/canvas/-/merge_requests/68
  */
 final class IssueRef
 {
@@ -21,10 +22,12 @@ final class IssueRef
     public const SOURCE_UNKNOWN = 'unknown';
 
     public function __construct(
-        public readonly string $number,
+        // Null when the reference is an MR URL: MRs carry no issue number.
+        public readonly ?string $number,
         public readonly string $source,
         public readonly ?string $projectPath = null,
         public readonly ?string $host = null,
+        public readonly ?string $mrIid = null,
     ) {
     }
 
@@ -45,6 +48,11 @@ final class IssueRef
         }
         if (preg_match('~^https?://(?:www\.)?drupal\.org/i/([0-9]+)$~', $clean, $matches)) {
             return new self($matches[1], self::SOURCE_DO);
+        }
+        // MR URLs live under the canonical project path (not the issue fork),
+        // so projectPath here is what the merge_requests API endpoint needs.
+        if (preg_match('~^https?://([^/]+)/(.+)/-/merge_requests/([0-9]+)(?:/.*)?$~', $clean, $matches)) {
+            return new self(null, self::SOURCE_GITLAB, $matches[2], $matches[1], $matches[3]);
         }
         if (preg_match('~^https?://([^/]+)/(.+)/-/(?:work_items|issues)/([0-9]+)$~', $clean, $matches)) {
             return new self($matches[3], self::SOURCE_GITLAB, $matches[2], $matches[1]);

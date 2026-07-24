@@ -40,6 +40,10 @@ class IssueInfo extends CommandBase
             return self::FAILURE;
         }
         $ref = $this->resolveIssueRef($input->getArgument('issue_number'));
+        if ($ref && $ref->number === null) {
+            $this->style->error('This command needs an issue number or issue URL, not an MR URL.');
+            return self::FAILURE;
+        }
         if ($ref && $this->isGitLabIssue($ref)) {
             return $this->executeGitLab($ref, $input, $output);
         }
@@ -71,7 +75,7 @@ class IssueInfo extends CommandBase
                 $important['comments'] = $this->getIssueComments($issue);
             }
             if ($input->getOption('mrs')) {
-                $forkInfo = $this->getProjectInfo($issue);
+                $forkInfo = $this->getProjectInfo($issue, $ref->projectPath ? basename($ref->projectPath) : null);
                 $important['merge requests'] = $forkInfo
                     ? $this->getProjectMrs((string) $forkInfo['id'], true, $this->getCanonicalProjectPath($forkInfo, $ref))
                     : [];
@@ -138,7 +142,7 @@ class IssueInfo extends CommandBase
         $projectPath = $ref->projectPath;
         if (!$projectPath) {
             // Bare number: derive the canonical project from the issue fork.
-            $projectPath = $this->getCanonicalProjectPath($this->getProjectInfo($ref->number), $ref);
+            $projectPath = $this->getCanonicalProjectPath($this->getProjectInfo($ref->number, $ref->projectPath ? basename($ref->projectPath) : null), $ref);
         }
         $issue_info = $this->getGitLabIssue($host, $projectPath, $ref->number);
 

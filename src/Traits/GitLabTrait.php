@@ -10,14 +10,33 @@ trait GitLabTrait
 {
     /**
      * Gets the issue fork project (named PROJECT-ISSUENUMBER) for an issue.
+     *
+     * More than one fork can match an issue number (e.g. a project rename
+     * left issue/canvas-N and issue/experience_builder-N); $projectName
+     * disambiguates when the caller knows the project machine name.
      */
-    protected function getProjectInfo(string $issue): ?array
+    protected function getProjectInfo(string $issue, ?string $projectName = null): ?array
     {
         $project_response = $this->getGitLabApiData("https://git.drupalcode.org/api/v4/projects/?search=-$issue");
         if (empty($project_response)) {
             return null;
         }
-        \assert(is_array($project_response) && count($project_response) === 1, 'Expected exactly one project to be found.');
+        if (count($project_response) > 1 && $projectName) {
+            $matches = array_values(array_filter(
+                $project_response,
+                fn ($project) => ($project['path_with_namespace'] ?? '') === "issue/$projectName-$issue"
+            ));
+            if (count($matches) === 1) {
+                return $matches[0];
+            }
+        }
+        if (count($project_response) > 1) {
+            $paths = array_map(fn ($project) => $project['path_with_namespace'] ?? '?', $project_response);
+            throw new \RuntimeException(
+                "Multiple issue forks found for issue $issue: " . implode(', ', $paths)
+                . '. Pass an issue URL that includes the project to disambiguate.'
+            );
+        }
         return $project_response[0];
     }
 
@@ -90,6 +109,8 @@ trait GitLabTrait
             'created_at',
             'updated_at',
             'work_in_progress',
+            'source_project_id',
+            'target_project_id',
         ];
 
         $mrs = [];
@@ -104,6 +125,81 @@ trait GitLabTrait
             $mrs[] = $filtered_mr;
         }
         return $mrs;
+    }
+
+    /**
+     * Fetches a single merge request from the canonical project.
+     */
+    protected function getMergeRequest(string $canonicalPath, string $iid): array
+    {
+        $encoded = rawurlencode($canonicalPath);
+        return $this->getGitLabApiData("https://git.drupalcode.org/api/v4/projects/$encoded/merge_requests/$iid");
+    }
+
+    protected function getProjectById(string|int $id): array
+    {
+        return $this->getGitLabApiData("https://git.drupalcode.org/api/v4/projects/$id");
+    }
+
+    protected function getProjectDefaultBranch(string $projectPath): ?string
+    {
+        $encoded = rawurlencode($projectPath);
+        $project = $this->getGitLabApiData("https://git.drupalcode.org/api/v4/projects/$encoded");
+        return $project['default_branch'] ?? null;
+    }
+
+    /**
+     * Fetches a raw file from a project via the API (honors gitlab_token,
+     * returns null on 404 instead of following web sign-in redirects).
+     */
+    protected function getRawProjectFile(string $projectPath, string $ref, string $file): ?string
+    {
+        static $httpClient = null;
+        if ($httpClient === null) {
+            $httpClient = HttpClient::create();
+        }
+        $url = sprintf(
+            'https://git.drupalcode.org/api/v4/projects/%s/repository/files/%s/raw?ref=%s',
+            rawurlencode($projectPath),
+            rawurlencode($file),
+            rawurlencode($ref)
+        );
+        $headers = ['User-Agent' => 'DrupalScripts/1.0 (Symfony HttpClient)'];
+        $token = Settings::getSetting('gitlab_token', null);
+        if ($token) {
+            $headers['Authorization'] = 'Bearer ' . $token;
+        }
+        $response = $httpClient->request('GET', $url, ['headers' => $headers, 'timeout' => 30]);
+        if ($response->getStatusCode() !== 200) {
+            return null;
+        }
+        return $response->getContent();
+    }
+
+    /**
+     * Picks an MR from a list: auto-select when only one open, otherwise
+     * prompt. Returns null when the list is empty.
+     */
+    protected function chooseOpenMr(array $mrs, string $label): ?array
+    {
+        if (empty($mrs)) {
+            return null;
+        }
+        if (count($mrs) === 1) {
+            return reset($mrs);
+        }
+
+        $choices = [];
+        foreach ($mrs as $mr) {
+            $draftLabel = $mr['draft'] ? '[DRAFT] ' : '';
+            $choices[] = $draftLabel . "MR !{$mr['iid']} ({$mr['state']}): " . $mr['title'];
+        }
+        $selectedTitle = $this->style->choice(
+            "Multiple merge requests found for $label. Please select one:",
+            $choices
+        );
+        $selectedIndex = array_search($selectedTitle, $choices);
+        return array_values($mrs)[$selectedIndex];
     }
 
     /**

@@ -5,5 +5,7 @@ default_head_branch: 9.4.x
 default_gitlab_project: "project/canvas"
 timezone: "America/New_York"
 top_dir: "/Users/user.name/sites"
+# Where site:setup creates new dev sites (defaults to ~/sites).
+sites_dir: "/Users/user.name/sites"
 remotes_ignore:
   - 'github'

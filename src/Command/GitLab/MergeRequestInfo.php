@@ -36,12 +36,16 @@ class MergeRequestInfo extends CommandBase
         if (!$ref) {
             return self::FAILURE;
         }
+        if ($ref->number === null) {
+            $this->style->error('This command needs an issue number or issue URL, not an MR URL.');
+            return self::FAILURE;
+        }
         $issue = $ref->number;
 
         $includeComments = (bool) $input->getOption('comments');
         $this->style->info('Getting merge request info for issue ' . $issue . " (include comments: " . ($includeComments ? 'yes' : 'no') . ')');
         try {
-            $projectInfo = $this->getProjectInfo($issue);
+            $projectInfo = $this->getProjectInfo($issue, $ref->projectPath ? basename($ref->projectPath) : null);
             if (!$projectInfo) {
                 $this->style->error("No project found for issue $issue");
                 return self::FAILURE;

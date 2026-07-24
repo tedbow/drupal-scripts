@@ -21,6 +21,7 @@ use TedbowDrupalScripts\Command\ListPlus;
 use TedbowDrupalScripts\Command\NewCodeBase;
 use TedbowDrupalScripts\Command\RunChecks;
 use TedbowDrupalScripts\Command\SeleniumServer;
+use TedbowDrupalScripts\Command\SiteSetup;
 use TedbowDrupalScripts\Command\XdebugOn;
 use TedbowDrupalScripts\ScriptApplication;
 
@@ -42,6 +43,7 @@ $app->add(new IssueDiffs());
 
 $app->add(new MergeRequestInfo());
 $app->add(new IssueCheckout());
+$app->add(new SiteSetup());
 
 // Add the checker commands in the order they should run.
 $app->add(new NitChecker());

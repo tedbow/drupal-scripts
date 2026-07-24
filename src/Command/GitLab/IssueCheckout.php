@@ -33,13 +33,17 @@ class IssueCheckout extends CommandBase
         if (!$ref) {
             return self::FAILURE;
         }
+        if ($ref->number === null) {
+            $this->style->error('This command needs an issue number or issue URL, not an MR URL.');
+            return self::FAILURE;
+        }
         $issue = $ref->number;
 
         $this->style->info('Finding open merge requests for issue ' . $issue);
 
         try {
             // Get project information
-            $projectInfo = $this->getProjectInfo($issue);
+            $projectInfo = $this->getProjectInfo($issue, $ref->projectPath ? basename($ref->projectPath) : null);
             if (!$projectInfo) {
                 $this->style->error("No project found for issue $issue");
                 return self::FAILURE;
@@ -51,34 +55,10 @@ class IssueCheckout extends CommandBase
             // Get all MRs for the project
             $allMrs = $this->getProjectMrs($projectId, false, $this->getCanonicalProjectPath($projectInfo, $ref));
 
-            // Show all MRs for the project
-            $openMrs = array_filter($allMrs, function ($mr) {
-                return $mr['state'] === 'opened';
-            });
-
-            if (empty($allMrs)) {
+            $selectedMr = $this->chooseOpenMr($allMrs, "issue $issue");
+            if (!$selectedMr) {
                 $this->style->warning("No open merge requests found for issue $issue");
                 return self::FAILURE;
-            }
-
-            // If multiple open MRs, let user choose
-            $selectedMr = null;
-            if (count($allMrs) > 1) {
-                $choices = [];
-                foreach ($allMrs as $mr) {
-                    $draftLabel = $mr['draft'] ? '[DRAFT] ' : '';
-                    $choices[] = $draftLabel . "MR !{$mr['iid']} ({$mr['state']}): " . $mr['title'];
-                }
-
-                $selectedTitle = $this->style->choice(
-                    'Multiple open merge requests found. Please select one:',
-                    $choices
-                );
-
-                $selectedIndex = array_search($selectedTitle, $choices);
-                $selectedMr = array_values($allMrs)[$selectedIndex];
-            } else {
-                $selectedMr = reset($openMrs);
             }
 
             $branchName = $selectedMr['source_branch'];
