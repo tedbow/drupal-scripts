@@ -42,7 +42,9 @@ class SiteSetup extends CommandBase
             // drupal/coder:^8.3 pins phpcs 3.x — canvas's phpcs config
             // references sniffs that coder 9.x (phpcs 4.x) dropped.
             'extra_dev_requires' => ['drupal/coder' => '^8.3'],
-            'npm_build'          => 'npm run build -w ui',
+            // Matches CI: the headless SDK workspaces must be built before
+            // the ui workspace can resolve them.
+            'npm_build'          => 'npm run build --workspace=drupal-canvas && npm run build --workspace=@drupal-canvas/headless && npm run build -w ui',
         ],
     ];
 
@@ -337,9 +339,33 @@ class SiteSetup extends CommandBase
             ];
         }
 
+        // GitLab-native issues: the related_merge_requests endpoint finds MRs
+        // even when the source fork is not named <project>-<issue> (multi-issue
+        // forks are common).
+        if ($ref->source === IssueRef::SOURCE_GITLAB && $ref->projectPath) {
+            try {
+                $mrs = $this->getGitLabRelatedMrs($ref->host ?? 'git.drupalcode.org', $ref->projectPath, $ref->number, false);
+            } catch (\Exception $e) {
+                $mrs = [];
+            }
+            $selected = $this->chooseOpenMr($mrs, "issue {$ref->number}");
+            if ($selected) {
+                $fork = $this->getProjectById($selected['source_project_id']);
+                return [
+                    'sourceBranch'  => $selected['source_branch'],
+                    'targetBranch'  => $selected['target_branch'],
+                    'forkPath'      => $fork['path_with_namespace'],
+                    'canonicalPath' => $canonicalPath,
+                    'iid'           => (string) $selected['iid'],
+                ];
+            }
+        }
+
+        // Drupal.org issues (and GitLab issues with no related MRs): find the
+        // issue fork by its <project>-<issue> naming convention.
         $forkInfo = $this->getProjectInfo($ref->number, basename($canonicalPath));
         if (!$forkInfo) {
-            throw new \RuntimeException("No issue fork found for issue {$ref->number}");
+            throw new \RuntimeException("No merge requests or issue fork found for issue {$ref->number}");
         }
         $resolvedCanonical = $this->getCanonicalProjectPath($forkInfo, $ref);
         $mrs = $this->getProjectMrs((string) $forkInfo['id'], false, $resolvedCanonical);
