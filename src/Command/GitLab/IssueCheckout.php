@@ -18,9 +18,9 @@ class IssueCheckout extends CommandBase
     protected function configure()
     {
         parent::configure();
-        $this->setDescription('Checkout an open merge request branch for a Drupal.org issue');
+        $this->setDescription('Checkout an open merge request branch for an issue');
         $this->setAliases(['issue-mr-checkout', 'mr-checkout']);
-        $this->addArgument('issue', InputArgument::REQUIRED, 'The issue number');
+        $this->addArgument('issue', InputArgument::REQUIRED, 'The issue number or issue URL (drupal.org or git.drupalcode.org)');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -29,8 +29,11 @@ class IssueCheckout extends CommandBase
             return self::FAILURE;
         }
 
-        $issue = $input->getArgument('issue');
-        \assert(is_string($issue));
+        $ref = $this->resolveIssueRef($input->getArgument('issue'));
+        if (!$ref) {
+            return self::FAILURE;
+        }
+        $issue = $ref->number;
 
         $this->style->info('Finding open merge requests for issue ' . $issue);
 
@@ -46,7 +49,7 @@ class IssueCheckout extends CommandBase
             $projectPath = $projectInfo['path_with_namespace'];
 
             // Get all MRs for the project
-            $allMrs = $this->getProjectMrs($projectId, false);
+            $allMrs = $this->getProjectMrs($projectId, false, $this->getCanonicalProjectPath($projectInfo, $ref));
 
             // Show all MRs for the project
             $openMrs = array_filter($allMrs, function ($mr) {
@@ -171,19 +174,6 @@ class IssueCheckout extends CommandBase
             $this->style->error($e->getMessage());
             return self::FAILURE;
         }
-    }
-
-    /**
-     * Get project information including path.
-     */
-    protected function getProjectInfo(string $issue): ?array
-    {
-        $project_response = $this->getGitLabApiData("https://git.drupalcode.org/api/v4/projects/?search=-$issue");
-        if (empty($project_response)) {
-            return null;
-        }
-        \assert(is_array($project_response) && count($project_response) === 1, 'Expected exactly one project to be found.');
-        return $project_response[0];
     }
 
     /**

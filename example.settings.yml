@@ -1,5 +1,8 @@
 my_user_id: 1234
 default_head_branch: 9.4.x
+# Canonical GitLab project fallback when it cannot be derived from an issue
+# URL or the issue fork's upstream project.
+default_gitlab_project: "project/canvas"
 timezone: "America/New_York"
 top_dir: "/Users/user.name/sites"
 remotes_ignore:

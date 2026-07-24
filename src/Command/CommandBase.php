@@ -12,6 +12,7 @@ use Symfony\Component\Process\Process;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use TedbowDrupalScripts\FunStyle;
+use TedbowDrupalScripts\IssueRef;
 use TedbowDrupalScripts\Settings;
 
 class CommandBase extends Command
@@ -137,6 +138,25 @@ class CommandBase extends Command
         return trim(shell_exec('git rev-parse --abbrev-ref HEAD'));
     }
 
+    /**
+     * Resolves an issue argument (number or URL) to an IssueRef.
+     *
+     * Falls back to the current branch name when no argument is given.
+     */
+    protected function resolveIssueRef(?string $arg): ?IssueRef
+    {
+        if ($arg === null || $arg === '') {
+            $issue = $this->getBranchIssue();
+            return $issue ? new IssueRef($issue, IssueRef::SOURCE_UNKNOWN) : null;
+        }
+        try {
+            return IssueRef::parse($arg);
+        } catch (\InvalidArgumentException $e) {
+            $this->style->error($e->getMessage());
+            return null;
+        }
+    }
+
 
     /**
      * @param $issue
@@ -156,7 +176,7 @@ class CommandBase extends Command
 
     protected function getURLDecodedJson(string $url)
     {
-        return json_decode(file_get_contents($url));
+        return json_decode(@file_get_contents($url));
     }
 
 

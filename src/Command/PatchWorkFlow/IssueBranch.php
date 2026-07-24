@@ -7,6 +7,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use TedbowDrupalScripts\Command\CommandBase;
+use TedbowDrupalScripts\IssueRef;
 
 /**
  * Creates a branch based on patch for an issue.
@@ -44,6 +45,17 @@ class IssueBranch extends CommandBase
             return self::FAILURE;
         }
         $issueNumber = $input->getArgument('issue_number');
+        if ($issueNumber) {
+            $ref = $this->resolveIssueRef($issueNumber);
+            if (!$ref) {
+                return self::FAILURE;
+            }
+            if ($ref->source === IssueRef::SOURCE_GITLAB) {
+                $this->style->error('This command uses the legacy Drupal.org patch workflow and does not support GitLab issues.');
+                return self::FAILURE;
+            }
+            $issueNumber = $ref->number;
+        }
         if (!$issueNumber) {
             $sorted_branches = $this->getBranchList('--sort=-committerdate');
             $issues = [];
@@ -94,7 +106,7 @@ class IssueBranch extends CommandBase
                 $this->style->info("Probably Merge request. No rebase");
                 return self::SUCCESS;
             } else {
-                $current_head = $this->getCurrentHead($input);
+                $current_head = $this->getCurrentHead($input, $issueNumber);
                 if ($this->style->confirm("rebase against $current_head?", false)) {
                     system("git checkout $current_head");
                     system("git pull");
@@ -109,11 +121,11 @@ class IssueBranch extends CommandBase
         }
     }
 
-    private function getCurrentHead(InputInterface $input)
+    private function getCurrentHead(InputInterface $input, ?string $issueNumber = null)
     {
         $current_head = $input->getArgument('head');
         if (!$current_head) {
-            $current_head = $this->getNodeBranch($input->getArgument('issue_number'));
+            $current_head = $this->getNodeBranch($issueNumber);
         }
         return $current_head;
     }
@@ -132,7 +144,7 @@ class IssueBranch extends CommandBase
                 $list[] = $patch->name;
             }
             $list['x'] = 'Do not create a branch, going to use merge request instead';
-            $current_head = $this->getCurrentHead($input);
+            $current_head = $this->getCurrentHead($input, $issueNumber);
             $choice = $this->style->choice(
                 "Create a new branch from patch against $current_head using patch?",
                 $list

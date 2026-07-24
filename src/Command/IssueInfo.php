@@ -8,6 +8,7 @@ use Neckberg\Hashdown\Hashdown;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use TedbowDrupalScripts\IssueRef;
 use TedbowDrupalScripts\Settings;
 use TedbowDrupalScripts\Traits\GitLabTrait;
 
@@ -27,7 +28,7 @@ class IssueInfo extends CommandBase
         parent::configure();
         $this->setDescription('Get basic issue info');
         $this->setAliases(['info']);
-        $this->addArgument('issue_number', InputArgument::OPTIONAL, 'The issue number');
+        $this->addArgument('issue_number', InputArgument::OPTIONAL, 'The issue number or issue URL (drupal.org or GitLab)');
         $this->addOption('comments');
         $this->addOption('mrs');
     }
@@ -38,7 +39,11 @@ class IssueInfo extends CommandBase
         if (self::FAILURE === parent::execute($input, $output)) {
             return self::FAILURE;
         }
-        $issue = $input->getArgument('issue_number') ?? $this->getBranchIssue();
+        $ref = $this->resolveIssueRef($input->getArgument('issue_number'));
+        if ($ref && $this->isGitLabIssue($ref)) {
+            return $this->executeGitLab($ref, $input, $output);
+        }
+        $issue = $ref?->number;
 
         if ($issue) {
             $node_info = $this->getEntityInfo($issue);
@@ -66,7 +71,10 @@ class IssueInfo extends CommandBase
                 $important['comments'] = $this->getIssueComments($issue);
             }
             if ($input->getOption('mrs')) {
-                $important['merge requests'] = $this->getProjectMrs($this->getProjectId($issue));
+                $forkInfo = $this->getProjectInfo($issue);
+                $important['merge requests'] = $forkInfo
+                    ? $this->getProjectMrs((string) $forkInfo['id'], true, $this->getCanonicalProjectPath($forkInfo, $ref))
+                    : [];
             }
 
             $important['last comment'] = $important_last_comment;
@@ -76,7 +84,9 @@ class IssueInfo extends CommandBase
                 $comments = (array) json_decode(file_get_contents("https://www.drupal.org/api-d7/comment.json?node={$node_info['nid']}&author=$my_uid"))->list;
                 $important['my comment count'] = count($comments);
                 $comment = array_pop($comments);
-                $important['my last comment'] = $this->getTimeFromTimeStamp($comment->created);
+                if ($comment) {
+                    $important['my last comment'] = $this->getTimeFromTimeStamp($comment->created);
+                }
                 //$important['my last comment'] = $important_last_comment['created'] = date("Y-m-d H:i:s", $comment->created);
             }
             if ($input->getOption('format') === 'md') {
@@ -95,6 +105,82 @@ class IssueInfo extends CommandBase
             $this->style->warning('Could not find issue for branch');
             return self::FAILURE;
         }
+    }
+
+    /**
+     * Decides whether an issue lives on GitLab rather than Drupal.org.
+     *
+     * Bare numbers are probed against the d.o API: GitLab-native issues have
+     * no d.o node. A successful probe is cached by getEntityInfo() so the
+     * d.o path does not refetch.
+     */
+    private function isGitLabIssue(IssueRef $ref): bool
+    {
+        if ($ref->source === IssueRef::SOURCE_GITLAB) {
+            return true;
+        }
+        if ($ref->source === IssueRef::SOURCE_DO) {
+            return false;
+        }
+        try {
+            // The number spaces can collide: a d.o node with this id may exist
+            // but be something other than an issue (e.g. a release node).
+            $node = $this->getEntityInfo($ref->number);
+            return ($node->type ?? '') !== 'project_issue';
+        } catch (\Throwable $e) {
+            return true;
+        }
+    }
+
+    private function executeGitLab(IssueRef $ref, InputInterface $input, OutputInterface $output)
+    {
+        $host = $ref->host ?? 'git.drupalcode.org';
+        $projectPath = $ref->projectPath;
+        if (!$projectPath) {
+            // Bare number: derive the canonical project from the issue fork.
+            $projectPath = $this->getCanonicalProjectPath($this->getProjectInfo($ref->number), $ref);
+        }
+        $issue_info = $this->getGitLabIssue($host, $projectPath, $ref->number);
+
+        $important = [
+            'title' => $issue_info['title'],
+            'status' => $issue_info['state'],
+            'tags' => $issue_info['labels'] ?? [],
+            'last updated' => $issue_info['updated_at'],
+            'summary' => $issue_info['description'] ?? '',
+        ];
+
+        $notes = $this->getGitLabIssueNotes($host, $projectPath, $ref->number);
+        if ($input->getOption('comments')) {
+            $important['comments'] = array_map(function ($note) {
+                return [
+                    'author' => is_array($note['author']) ? ($note['author']['username'] ?? '') : $note['author'],
+                    'comment' => $note['body'],
+                    'created' => $note['created_at'],
+                ];
+            }, array_values($notes));
+        }
+        if ($input->getOption('mrs')) {
+            $important['merge requests'] = $this->getGitLabRelatedMrs($host, $projectPath, $ref->number);
+        }
+        if ($notes) {
+            $last_note = end($notes);
+            $important['last comment'] = [
+                'name' => is_array($last_note['author']) ? ($last_note['author']['username'] ?? '') : $last_note['author'],
+                'created' => $last_note['created_at'],
+            ];
+        }
+
+        if ($input->getOption('format') === 'md') {
+            $this->outputMarkdown($important, $output, false);
+            return self::SUCCESS;
+        }
+        if ($this->outputJson($input)) {
+            $output->write(json_encode($important, JSON_PRETTY_PRINT));
+            return self::SUCCESS;
+        }
+        $output->write(print_r($important, true));
+        return self::SUCCESS;
     }
 
     private function setTags(array &$data): void
@@ -139,16 +225,21 @@ class IssueInfo extends CommandBase
         return $comments;
     }
 
-    protected function outputMarkdown(array $data, OutputInterface $output)
+    protected function outputMarkdown(array $data, OutputInterface $output, bool $isHtml = true)
     {
-        $htmlConverter = new HtmlConverter();
-        $md_summary = $htmlConverter->convert($data['summary']);
+        // GitLab bodies are already markdown; d.o bodies are HTML.
+        if ($isHtml) {
+            $htmlConverter = new HtmlConverter();
+            $md_summary = $htmlConverter->convert($data['summary']);
+        } else {
+            $md_summary = $data['summary'];
+        }
         $data['summary'] = 'SUMMARY TOKEN';
         $orig_comments = $data['comments'] ?? [];
         $data['comments'] = [];
 
         foreach ($orig_comments as $comment) {
-            $data['comments']["{$comment['author']} ({$comment['created']})"] = strip_tags($comment['comment']);
+            $data['comments']["{$comment['author']} ({$comment['created']})"] = $isHtml ? strip_tags($comment['comment']) : $comment['comment'];
         }
         $orig_mrs = $data['merge requests'] ?? [];
         $data['merge requests'] = [];

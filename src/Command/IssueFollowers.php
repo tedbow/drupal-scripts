@@ -6,6 +6,7 @@ namespace TedbowDrupalScripts\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use TedbowDrupalScripts\IssueRef;
 
 class IssueFollowers extends CommandBase
 {
@@ -29,14 +30,16 @@ class IssueFollowers extends CommandBase
         if (self::FAILURE === parent::execute($input, $output)) {
             return self::FAILURE;
         }
-        $issueNumber = $input->getArgument('issue_number');
-        if (!$issueNumber) {
-            $issueNumber = $this->getBranchIssue();
-            if (!$issueNumber) {
-                $this->style->warning("could not find issue");
-                return static::FAILURE;
-            }
+        $ref = $this->resolveIssueRef($input->getArgument('issue_number'));
+        if (!$ref) {
+            $this->style->warning("could not find issue");
+            return static::FAILURE;
         }
+        if ($ref->source === IssueRef::SOURCE_GITLAB) {
+            $this->style->error('This command uses Drupal.org issue data and does not support GitLab issues.');
+            return static::FAILURE;
+        }
+        $issueNumber = $ref->number;
         $info = $this->getEntityInfo($issueNumber);
         $followerNames = [];
         foreach ($info->flag_project_issue_follow_user as $follower) {

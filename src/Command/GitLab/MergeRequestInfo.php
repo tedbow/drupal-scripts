@@ -22,7 +22,7 @@ class MergeRequestInfo extends CommandBase
         parent::configure();
         $this->setDescription('Get basic merge request info');
         $this->setAliases(['mr-info']);
-        $this->addArgument('issue', InputArgument::REQUIRED, 'The issue id.');
+        $this->addArgument('issue', InputArgument::REQUIRED, 'The issue number or issue URL (drupal.org or git.drupalcode.org)');
         $this->addOption('comments', null, InputOption::VALUE_OPTIONAL, 'Include comments in output', false);
     }
 
@@ -32,13 +32,21 @@ class MergeRequestInfo extends CommandBase
             return self::FAILURE;
         }
 
-        $issue = $input->getArgument('issue');
-        \assert(is_string($issue));
+        $ref = $this->resolveIssueRef($input->getArgument('issue'));
+        if (!$ref) {
+            return self::FAILURE;
+        }
+        $issue = $ref->number;
 
         $includeComments = (bool) $input->getOption('comments');
         $this->style->info('Getting merge request info for issue ' . $issue . " (include comments: " . ($includeComments ? 'yes' : 'no') . ')');
         try {
-            $mrs = $this->getProjectMrs($this->getProjectId($issue), $includeComments);
+            $projectInfo = $this->getProjectInfo($issue);
+            if (!$projectInfo) {
+                $this->style->error("No project found for issue $issue");
+                return self::FAILURE;
+            }
+            $mrs = $this->getProjectMrs((string) $projectInfo['id'], $includeComments, $this->getCanonicalProjectPath($projectInfo, $ref));
 
             $output->write(json_encode($mrs, JSON_PRETTY_PRINT));
             return self::SUCCESS;

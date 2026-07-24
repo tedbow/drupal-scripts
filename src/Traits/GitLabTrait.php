@@ -3,26 +3,70 @@
 namespace TedbowDrupalScripts\Traits;
 
 use Symfony\Component\HttpClient\HttpClient;
+use TedbowDrupalScripts\IssueRef;
 use TedbowDrupalScripts\Settings;
 
 trait GitLabTrait
 {
-    protected function getProjectId(string $issue): string
+    /**
+     * Gets the issue fork project (named PROJECT-ISSUENUMBER) for an issue.
+     */
+    protected function getProjectInfo(string $issue): ?array
     {
-        // First find the project associated with the issue.
         $project_response = $this->getGitLabApiData("https://git.drupalcode.org/api/v4/projects/?search=-$issue");
         if (empty($project_response)) {
-            $this->style->error("No project found for issue $issue");
-            return self::FAILURE;
+            return null;
         }
         \assert(is_array($project_response) && count($project_response) === 1, 'Expected exactly one project to be found.');
-        \assert(isset($project_response[0]['id']), 'Expected project to have an ID.');
-        return $project_response[0]['id'];
+        return $project_response[0];
     }
 
-    protected function getProjectMrs(string $projectId, bool $includeComments = true): array
+    protected function getProjectId(string $issue): string
     {
-        $mr_response = $this->getGitLabApiData("https://git.drupalcode.org/api/v4/projects/project%2Fcanvas/merge_requests?state=all&source_project_id=$projectId");
+        $projectInfo = $this->getProjectInfo($issue);
+        if (!$projectInfo) {
+            throw new \Exception("No project found for issue $issue");
+        }
+        \assert(isset($projectInfo['id']), 'Expected project to have an ID.');
+        return (string) $projectInfo['id'];
+    }
+
+    /**
+     * Determines the canonical project path (e.g. "project/canvas").
+     *
+     * Order: the parsed issue URL, the fork's upstream project, the
+     * default_gitlab_project setting.
+     */
+    protected function getCanonicalProjectPath(?array $forkProjectInfo, ?IssueRef $ref): string
+    {
+        if ($ref?->projectPath) {
+            return $ref->projectPath;
+        }
+        if ($forkProjectInfo) {
+            // The project search response omits forked_from_project; the
+            // single-project endpoint includes it.
+            if (!isset($forkProjectInfo['forked_from_project'])) {
+                $forkProjectInfo = $this->getGitLabApiData("https://git.drupalcode.org/api/v4/projects/{$forkProjectInfo['id']}");
+            }
+            if (isset($forkProjectInfo['forked_from_project']['path_with_namespace'])) {
+                return $forkProjectInfo['forked_from_project']['path_with_namespace'];
+            }
+        }
+        return Settings::getSetting('default_gitlab_project', 'project/canvas');
+    }
+
+    protected function getProjectMrs(string $projectId, bool $includeComments = true, ?string $canonicalProject = null): array
+    {
+        $encodedProject = rawurlencode($canonicalProject ?? 'project/canvas');
+        $mr_response = $this->getGitLabApiData("https://git.drupalcode.org/api/v4/projects/$encodedProject/merge_requests?state=all&source_project_id=$projectId");
+        return $this->filterMrs($mr_response, $includeComments);
+    }
+
+    /**
+     * Reduces raw MR API responses to the keys the commands use.
+     */
+    private function filterMrs(array $mr_response, bool $includeComments): array
+    {
         $important_keys = [
             'id',
             'iid',
@@ -60,6 +104,43 @@ trait GitLabTrait
             $mrs[] = $filtered_mr;
         }
         return $mrs;
+    }
+
+    /**
+     * Fetches a GitLab issue. Work items on git.drupalcode.org are served by
+     * the /issues REST endpoint; /work_items is the fallback.
+     */
+    protected function getGitLabIssue(string $host, string $projectPath, string $iid): array
+    {
+        $encoded = rawurlencode($projectPath);
+        try {
+            return $this->getGitLabApiData("https://$host/api/v4/projects/$encoded/issues/$iid");
+        } catch (\Exception $e) {
+            return $this->getGitLabApiData("https://$host/api/v4/projects/$encoded/work_items/$iid");
+        }
+    }
+
+    protected function getGitLabIssueNotes(string $host, string $projectPath, string $iid): array
+    {
+        $encoded = rawurlencode($projectPath);
+        $notes_response = $this->getGitLabApiData("https://$host/api/v4/projects/$encoded/issues/$iid/notes?sort=asc");
+        $notes = [];
+        foreach ($notes_response as $note) {
+            if (($note['system'] ?? false) === true) {
+                continue;
+            }
+            $note_data = array_intersect_key($note, array_flip(['id', 'body', 'author', 'created_at', 'updated_at']));
+            self::filterUserInfo($note_data);
+            $notes[$note['id']] = $note_data;
+        }
+        return $notes;
+    }
+
+    protected function getGitLabRelatedMrs(string $host, string $projectPath, string $iid, bool $includeComments = true): array
+    {
+        $encoded = rawurlencode($projectPath);
+        $mr_response = $this->getGitLabApiData("https://$host/api/v4/projects/$encoded/issues/$iid/related_merge_requests");
+        return $this->filterMrs($mr_response, $includeComments);
     }
 
     private static function filterUserInfo(array &$data): void
