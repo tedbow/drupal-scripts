@@ -250,8 +250,12 @@ class SiteSetup extends CommandBase
         $extraModules = array_filter(explode(',', (string) $input->getOption('modules')));
         if ($extraModules) {
             $this->style->section('Requiring extra modules: ' . implode(', ', $extraModules));
+            // No -W here: with all transitive updates allowed, composer can
+            // re-resolve drupal/core and flip it from the locked packagist
+            // dist to the core/ path repository — uninstalling the dist
+            // package then deletes the core/ directory contents.
             $this->runLive(sprintf(
-                'composer require %s --no-interaction -W',
+                'composer require %s --no-interaction',
                 implode(' ', array_map('escapeshellarg', $extraModules))
             ), $siteDir, $composerEnv);
             $this->saveExtras($siteDir, $project, $extraModules);
